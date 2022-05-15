@@ -3,6 +3,8 @@
 [![](https://img.shields.io/badge/made%20by-Breth-blue.svg?style=flat-square)](https://breth.app)
 [![](https://img.shields.io/badge/project-multiformats-blue.svg?style=flat-square)](https://github.com/multiformats/multiformats)
 [![Swift Package Manager compatible](https://img.shields.io/badge/SPM-compatible-blue.svg?style=flat-square)](https://github.com/apple/swift-package-manager)
+![Build & Test (macos and linux)](https://github.com/swift-libp2p/swift-multibase/actions/workflows/swift.yml/badge.svg)
+
 
 > Self identifying base encodings using the Multibase spec
 
