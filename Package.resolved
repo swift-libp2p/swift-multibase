@@ -1,0 +1,16 @@
+{
+  "object": {
+    "pins": [
+      {
+        "package": "swift-bases",
+        "repositoryURL": "https://github.com/swift-libp2p/swift-bases.git",
+        "state": {
+          "branch": null,
+          "revision": "ea01c5bd95da153b00bb46dbb7d8491d8da4b31f",
+          "version": "0.0.1"
+        }
+      }
+    ]
+  },
+  "version": 1
+}
