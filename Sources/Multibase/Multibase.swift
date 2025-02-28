@@ -1,67 +1,80 @@
-import Foundation
+//===----------------------------------------------------------------------===//
+//
+// This source file is part of the swift-libp2p open source project
+//
+// Copyright (c) 2022-2025 swift-libp2p project authors
+// Licensed under MIT
+//
+// See LICENSE for license information
+// See CONTRIBUTORS for the list of swift-libp2p project authors
+//
+// SPDX-License-Identifier: MIT
+//
+//===----------------------------------------------------------------------===//
 
 import Base2
-import Base8
-import BaseX
 import Base32
 import Base64
+import Base8
+import BaseX
+import Foundation
 
-public enum BaseEncoding:UInt8, CaseIterable, Equatable {
-    case identity          = 000 // 0x00
-    case base2             = 048 // 0 String(... radix: 2)
-    case base8             = 055 // 7 
-    case base10            = 057 // 9
-    case base16            = 102 // f
-    case base16Upper       = 070 // F
-    case base32Hex         = 118 // v Base32 extended hex alphabet
-    case base32HexUpper    = 086 // V Base32 extended hex alphabet
-    case base32HexPad      = 116 // t Base32 extended hex alphabet
-    case base32HexPadUpper = 084 // T Base32 extended hex alphabet
-    case base32            = 098 // b Base32 regular alphabet
-    case base32Upper       = 066 // B Base32 regular alphabet
-    case base32Pad         = 099 // c Base32 regular alphabet
-    case base32PadUpper    = 067 // C Base32 regular alphabet
-    case base32z           = 104 // h Base32 extended Z alphabet
-    case base36            = 107 // k
-    case base36Upper       = 075 // K
-    case base58btc         = 122 // z
-    case base58flickr      = 090 // Z
-    case base64            = 109 // m
-    case base64Pad         = 077 // M
-    case base64Url         = 117 // u
-    case base64UrlPad      = 085 // U
+public enum BaseEncoding: UInt8, CaseIterable, Equatable {
+    case identity = 000  // 0x00
+    case base2 = 048  // 0 String(... radix: 2)
+    case base8 = 055  // 7
+    case base10 = 057  // 9
+    case base16 = 102  // f
+    case base16Upper = 070  // F
+    case base32Hex = 118  // v Base32 extended hex alphabet
+    case base32HexUpper = 086  // V Base32 extended hex alphabet
+    case base32HexPad = 116  // t Base32 extended hex alphabet
+    case base32HexPadUpper = 084  // T Base32 extended hex alphabet
+    case base32 = 098  // b Base32 regular alphabet
+    case base32Upper = 066  // B Base32 regular alphabet
+    case base32Pad = 099  // c Base32 regular alphabet
+    case base32PadUpper = 067  // C Base32 regular alphabet
+    case base32z = 104  // h Base32 extended Z alphabet
+    case base36 = 107  // k
+    case base36Upper = 075  // K
+    case base58btc = 122  // z
+    case base58flickr = 090  // Z
+    case base64 = 109  // m
+    case base64Pad = 077  // M
+    case base64Url = 117  // u
+    case base64UrlPad = 085  // U
     //case proquint          = 113 // q
-    
-    var alphabet:String {
+
+    var alphabet: String {
         switch self {
-        case .identity:          return ""
-        case .base2:             return "01"
-        case .base8:             return "01234567"
-        case .base10:            return "0123456789"
-        case .base16:            return "0123456789abcdef"
-        case .base16Upper:       return "0123456789ABCDEF"
-        case .base32:            return "abcdefghijklmnopqrstuvwxyz234567"
-        case .base32Pad:         return "abcdefghijklmnopqrstuvwxyz234567="
-        case .base32Upper:       return "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567"
-        case .base32PadUpper:    return "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567="
-        case .base32Hex:         return "0123456789abcdefghijklmnopqrstuv"
-        case .base32HexPad:      return "0123456789abcdefghijklmnopqrstuv="
-        case .base32HexUpper:    return "0123456789ABCDEFGHIJKLMNOPQRSTUV"
+        case .identity: return ""
+        case .base2: return "01"
+        case .base8: return "01234567"
+        case .base10: return "0123456789"
+        case .base16: return "0123456789abcdef"
+        case .base16Upper: return "0123456789ABCDEF"
+        case .base32: return "abcdefghijklmnopqrstuvwxyz234567"
+        case .base32Pad: return "abcdefghijklmnopqrstuvwxyz234567="
+        case .base32Upper: return "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567"
+        case .base32PadUpper: return "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567="
+        case .base32Hex: return "0123456789abcdefghijklmnopqrstuv"
+        case .base32HexPad: return "0123456789abcdefghijklmnopqrstuv="
+        case .base32HexUpper: return "0123456789ABCDEFGHIJKLMNOPQRSTUV"
         case .base32HexPadUpper: return "0123456789ABCDEFGHIJKLMNOPQRSTUV="
-        case .base32z:           return "ybndrfg8ejkmcpqxot1uwisza345h769"
-        case .base36:            return "0123456789abcdefghijklmnopqrstuvwxyz"
-        case .base36Upper:       return "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-        case .base58btc:         return "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz"
-        case .base58flickr:      return "123456789abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ"
-        case .base64:            return "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
-        case .base64Pad:         return "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/="
-        case .base64Url:         return "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_"
-        case .base64UrlPad:      return "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_="
+        case .base32z: return "ybndrfg8ejkmcpqxot1uwisza345h769"
+        case .base36: return "0123456789abcdefghijklmnopqrstuvwxyz"
+        case .base36Upper: return "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+        case .base58btc: return "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz"
+        case .base58flickr: return "123456789abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ"
+        case .base64: return "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
+        case .base64Pad: return "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/="
+        case .base64Url: return "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_"
+        case .base64UrlPad: return "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_="
         //case .proquint:          return ""
         }
     }
-    
-    public var status:String {
+
+    public var status: String {
         switch self {
         case .identity:
             return "default"
@@ -114,7 +127,7 @@ public enum BaseEncoding:UInt8, CaseIterable, Equatable {
         }
     }
 
-    public var description:String? {
+    public var description: String? {
         switch self {
         case .identity:
             return "8-bit binary (encoder and decoder keeps data unmodified)"
@@ -166,19 +179,19 @@ public enum BaseEncoding:UInt8, CaseIterable, Equatable {
         //    return "PRO-QUINT https://arxiv.org/html/0901.4016"
         }
     }
-    
-    public var bytePrefix:UInt8 {
-        return self.rawValue
+
+    public var bytePrefix: UInt8 {
+        self.rawValue
     }
-    
-    public var charPrefix:String {
-        return String(UnicodeScalar(self.rawValue))
+
+    public var charPrefix: String {
+        String(UnicodeScalar(self.rawValue))
     }
-    
-    public func encode(data rawData:Data) -> String {
+
+    public func encode(data rawData: Data) -> String {
         let byteString = [self.rawValue] + rawData
         let stringBaseEncoding = String(bytes: [self.rawValue], encoding: String.Encoding.utf8)!
-        
+
         let leadingZero = Array("\\x00".utf8)
         var zeroes = 0
         var data = rawData
@@ -187,14 +200,14 @@ public enum BaseEncoding:UInt8, CaseIterable, Equatable {
             data = data.dropFirst(leadingZero.count)
         }
         if zeroes > 0 { print("We detected \(zeroes) leading zeroes and removed them...") }
-        
+
         if .base16 == self || .base16Upper == self {
             zeroes = zeroes * 2
         }
         if zeroes > 0 {
-            data.insert(contentsOf: Array<UInt8>(repeating: 0, count: zeroes), at: data.startIndex)
+            data.insert(contentsOf: [UInt8](repeating: 0, count: zeroes), at: data.startIndex)
         }
-        
+
         var encoding = ""
         switch self {
         case .identity:
@@ -246,22 +259,22 @@ public enum BaseEncoding:UInt8, CaseIterable, Equatable {
         //case .proquint:
         //    // TODO: Implement Me
         }
-        
+
         return stringBaseEncoding + encoding
     }
-    
+
     /// Given a Multibase compliant String, this method will attempt to extract the base prefix from the string and decode it
-    public static func decode(_ d:String) throws -> (base:BaseEncoding, data:Data) {
+    public static func decode(_ d: String) throws -> (base: BaseEncoding, data: Data) {
         let base = d.baseEncoding
         let encodedData = base == .identity ? d : String(d.dropFirst())
         return try self.decode(encodedData, as: base)
     }
-    
+
     /// Given an encoded String that is not Multibase compliant (aka missing the Multibase prefix) this method will attempt to decode the string in the base specified.
-    public static func decode(_ encodedData:String, as base:BaseEncoding) throws -> (base:BaseEncoding, data:Data) {
+    public static func decode(_ encodedData: String, as base: BaseEncoding) throws -> (base: BaseEncoding, data: Data) {
         switch base {
         case .base2:
-            return (base: .base2, data: try Data(binaryString: encodedData))// .binaryDecoded)
+            return (base: .base2, data: try Data(binaryString: encodedData))  // .binaryDecoded)
         case .base8:
             return (base: .base8, data: try Base8.decode(encodedData))
         case .base10:
@@ -298,14 +311,18 @@ public enum BaseEncoding:UInt8, CaseIterable, Equatable {
             return (base: .base58flickr, data: try BaseX.decode(encodedData, as: .base58Flickr))
         case .base64:
             //Ensure the non padded string is base64 compliant before initing
-            guard let d = Data(base64Encoded: encodedData.base64CompliantString) else { throw MultibaseError.invalidStringEncoding }
+            guard let d = Data(base64Encoded: encodedData.base64CompliantString) else {
+                throw MultibaseError.invalidStringEncoding
+            }
             return (base: .base64, data: d)
         case .base64Pad:
             guard let d = Data(base64Encoded: encodedData) else { throw MultibaseError.invalidStringEncoding }
             return (base: .base64Pad, data: d)
         case .base64Url:
             //Ensure the non padded string is base64 compliant before initing
-            guard let d = Data(base64URLEncoded: encodedData.base64CompliantString) else { throw MultibaseError.invalidStringEncoding }
+            guard let d = Data(base64URLEncoded: encodedData.base64CompliantString) else {
+                throw MultibaseError.invalidStringEncoding
+            }
             return (base: .base64Url, data: d)
         case .base64UrlPad:
             guard let d = Data(base64URLEncoded: encodedData) else { throw MultibaseError.invalidStringEncoding }
@@ -320,19 +337,22 @@ public enum BaseEncoding:UInt8, CaseIterable, Equatable {
             throw MultibaseError.unknownBase
         }
     }
-    
-    public static func decodeIntoString(_ encodedData:String, using encoding: String.Encoding = .utf8) throws -> (base:BaseEncoding, string:String) {
+
+    public static func decodeIntoString(
+        _ encodedData: String,
+        using encoding: String.Encoding = .utf8
+    ) throws -> (base: BaseEncoding, string: String) {
         let (base, data) = try self.decode(encodedData)
         return (base: base, string: String(data: data, encoding: encoding)!)
     }
-    
-    public enum MultibaseError:Error {
+
+    public enum MultibaseError: Error {
         case unknownBase
         case invalidStringEncoding
     }
 }
 
-public extension String {
+extension String {
     /// Attempts to decode a Base encoded string into plain text
     /// - Parameters:
     ///   - encodedString: A base encoded string (ex: binary, hex, decimal, base32, base58 etc...)
@@ -343,25 +363,31 @@ public extension String {
     /// ```
     /// try String(decoding: "429328951066508984658627669258025763026247056774804621697313", as: .base10Decimal, using: .utf8) => "Decentralize everything!!"
     /// ```
-    init(decoding encodedString:String, as base:BaseEncoding, using stringEncoding:String.Encoding = .utf8) throws {
+    public init(
+        decoding encodedString: String,
+        as base: BaseEncoding,
+        using stringEncoding: String.Encoding = .utf8
+    ) throws {
         let d = try Data(decoding: encodedString, as: base)
-        guard let str = String(data: d, encoding: stringEncoding) else { throw BaseEncoding.MultibaseError.invalidStringEncoding }
+        guard let str = String(data: d, encoding: stringEncoding) else {
+            throw BaseEncoding.MultibaseError.invalidStringEncoding
+        }
         self = str
     }
-    
-    var baseEncoding: BaseEncoding {
+
+    public var baseEncoding: BaseEncoding {
         guard let base = Array(self.utf8).first else { return .identity }
         return BaseEncoding(rawValue: base) ?? .identity
     }
-    
-    func encodeUTF8(base: BaseEncoding) -> String {
-        return base.encode(data: self.data(using: .utf8)!)
+
+    public func encodeUTF8(base: BaseEncoding) -> String {
+        base.encode(data: self.data(using: .utf8)!)
     }
-    
-    func encodeASCII(base: BaseEncoding) -> String {
-        return base.encode(data: self.data(using: .ascii)!)
+
+    public func encodeASCII(base: BaseEncoding) -> String {
+        base.encode(data: self.data(using: .ascii)!)
     }
-    
+
     /// Takes a string, converts it to data using the specified String.Encoding and then encodes that data into the specified base
     /// - Parameters:
     ///   - base: The base to encode the data representation of the string
@@ -372,12 +398,12 @@ public extension String {
     /// ```
     /// "Hello World".encode(as: .base16, using: .utf8) // -> "f48656c6c6f20576f726c64"
     /// ```
-    func encode(as base: BaseEncoding, using encoding:String.Encoding = .ascii) -> String {
-        return base.encode(data: self.data(using: encoding) ?? Data())
+    public func encode(as base: BaseEncoding, using encoding: String.Encoding = .ascii) -> String {
+        base.encode(data: self.data(using: encoding) ?? Data())
     }
 }
 
-public extension Data {
+extension Data {
     /// Attempts to decode a Base encoded string into it's Data representation
     /// - Parameters:
     ///   - encodedString: A base encoded string (ex: binary, hex, decimal, base32, base58 etc...)
@@ -388,10 +414,10 @@ public extension Data {
     /// ```
     /// try Data(decoding: "429328951066508984658627669258025763026247056774804621697313" as: .base10Decimal) // -> Data
     /// ```
-    init(decoding encodedString:String, as base:BaseEncoding) throws {
+    public init(decoding encodedString: String, as base: BaseEncoding) throws {
         self = try BaseEncoding.decode(encodedString, as: base).data
     }
-    
+
     /// Encodes the data into the spcified base
     /// - Parameters:
     ///   - base: The base to encode the data into
@@ -402,12 +428,12 @@ public extension Data {
     /// ```
     /// "Hello World".data(using: .utf8)!.asString(base: .base16, withMultibasePrefix: true) // -> "f48656c6c6f20576f726c64"
     /// ```
-    func asString(base:BaseEncoding, withMultibasePrefix prefix:Bool = false) -> String {
-        return prefix ? base.encode(data: self) : String(base.encode(data: self).dropFirst(1))
+    public func asString(base: BaseEncoding, withMultibasePrefix prefix: Bool = false) -> String {
+        prefix ? base.encode(data: self) : String(base.encode(data: self).dropFirst(1))
     }
 }
 
-public extension Array where Element == UInt8 {
+extension Array where Element == UInt8 {
     /// Attempts to decode a Base encoded string into it's UInt8 Array representation
     /// - Parameters:
     ///   - encodedString: A base encoded string (ex: binary, hex, decimal, base32, base58 etc...)
@@ -418,10 +444,10 @@ public extension Array where Element == UInt8 {
     /// ```
     /// try Array<UInt8>(decoding: "429328951066508984658627669258025763026247056774804621697313" as: .base10Decimal) // -> [UInt8]
     /// ```
-    init(decoding encodedString:String, as base:BaseEncoding) throws {
+    public init(decoding encodedString: String, as base: BaseEncoding) throws {
         self = Array(try Data(decoding: encodedString, as: base))
     }
-    
+
     /// Encodes the bytes into the spcified base
     /// - Parameters:
     ///   - base: The base to encode the bytes into
@@ -432,7 +458,7 @@ public extension Array where Element == UInt8 {
     /// ```
     /// Array<UInt8>("Hello World".data(using: .utf8)!).asString(base: .base16, withMultibasePrefix: true) // -> "f48656c6c6f20576f726c64"
     /// ```
-    func asString(base:BaseEncoding, withMultibasePrefix prefix:Bool = false) -> String {
-        return prefix ? base.encode(data: Data(self)) : String(base.encode(data: Data(self)).dropFirst(1))
+    public func asString(base: BaseEncoding, withMultibasePrefix prefix: Bool = false) -> String {
+        prefix ? base.encode(data: Data(self)) : String(base.encode(data: Data(self)).dropFirst(1))
     }
 }
