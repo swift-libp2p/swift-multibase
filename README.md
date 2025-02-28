@@ -133,7 +133,7 @@ Let's make this code better together! 🤝
 
 ## Credits
 
-- [Multiformat / Multibase Spec](https://github.com/multiformats/multibase/blob/master/README.md)
+- [Multiformat / Multibase Spec](https://github.com/multiformats/multibase)
 
 
 ## License
