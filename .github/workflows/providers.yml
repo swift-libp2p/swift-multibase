@@ -9,8 +9,4 @@ jobs:
     name: Tests
     uses: swift-libp2p/github-workflows/.github/workflows/providers.yml@main
     with:
-      dependents: |-
-        [\"swift-libp2p/swift-multihash\",
-        \"swift-libp2p/swift-cid\",
-        \"swift-libp2p/swift-multiaddr\",
-        \"swift-libp2p/swift-libp2p-crypto\"]
+      dependents: "[\"swift-libp2p/swift-multihash\",\"swift-libp2p/swift-cid\",\"swift-libp2p/swift-multiaddr\",\"swift-libp2p/swift-libp2p-crypto\"]"
