@@ -6,8 +6,8 @@
         "repositoryURL": "https://github.com/swift-libp2p/swift-bases.git",
         "state": {
           "branch": null,
-          "revision": "3cf27cf95d70248b0a1d99eee06cdf8b235241a8",
-          "version": "0.0.3"
+          "revision": "b5fb3260b0a2020d17700fbf496e4f9bba5e673e",
+          "version": "0.0.4"
         }
       }
     ]
