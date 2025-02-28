@@ -1,5 +1,17 @@
-// swift-tools-version:5.3
-// The swift-tools-version declares the minimum version of Swift required to build this package.
+// swift-tools-version:5.5
+//===----------------------------------------------------------------------===//
+//
+// This source file is part of the swift-libp2p open source project
+//
+// Copyright (c) 2022-2025 swift-libp2p project authors
+// Licensed under MIT
+//
+// See LICENSE for license information
+// See CONTRIBUTORS for the list of swift-libp2p project authors
+//
+// SPDX-License-Identifier: MIT
+//
+//===----------------------------------------------------------------------===//
 
 import PackageDescription
 
@@ -9,7 +21,8 @@ let package = Package(
         // Products define the executables and libraries a package produces, and make them visible to other packages.
         .library(
             name: "Multibase",
-            targets: ["Multibase"]),
+            targets: ["Multibase"]
+        )
     ],
     dependencies: [
         // Dependencies declare other packages that this package depends on.
@@ -21,14 +34,16 @@ let package = Package(
         .target(
             name: "Multibase",
             dependencies: [
-                .product(name:  "Base2", package: "swift-bases"),
-                .product(name:  "Base8", package: "swift-bases"),
-                .product(name:  "BaseX", package: "swift-bases"),
+                .product(name: "Base2", package: "swift-bases"),
+                .product(name: "Base8", package: "swift-bases"),
+                .product(name: "BaseX", package: "swift-bases"),
                 .product(name: "Base32", package: "swift-bases"),
-                .product(name: "Base64", package: "swift-bases")
-            ]),
+                .product(name: "Base64", package: "swift-bases"),
+            ]
+        ),
         .testTarget(
             name: "MultibaseTests",
-            dependencies: ["Multibase"]),
+            dependencies: ["Multibase"]
+        ),
     ]
 )
