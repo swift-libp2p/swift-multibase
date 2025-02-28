@@ -3,6 +3,7 @@
 *.md
 *.txt
 Package.swift
+Package.resolved
 .gitignore
 .swift-format
 .licenseignore
