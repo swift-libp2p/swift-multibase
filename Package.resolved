@@ -1,16 +1,15 @@
 {
-  "object": {
-    "pins": [
-      {
-        "package": "swift-bases",
-        "repositoryURL": "https://github.com/swift-libp2p/swift-bases.git",
-        "state": {
-          "branch": null,
-          "revision": "3cf27cf95d70248b0a1d99eee06cdf8b235241a8",
-          "version": "0.0.3"
-        }
+  "originHash" : "ac35e736ec7399cf26c31cf9e939dfec392c9ea2a1a6a255a365e2ac371d96c7",
+  "pins" : [
+    {
+      "identity" : "swift-bases",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/swift-libp2p/swift-bases.git",
+      "state" : {
+        "revision" : "96615d4b582f9f6536d8278304ce2a64c8e5288a",
+        "version" : "0.2.0"
       }
-    ]
-  },
-  "version": 1
+    }
+  ],
+  "version" : 3
 }
