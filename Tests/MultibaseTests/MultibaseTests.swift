@@ -955,16 +955,16 @@ struct MultibaseTests {
         #expect(testString.encodeUTF8(base: .base64UrlPad) == CaseTwoLeadingZeros["base64urlpad"])
     }
 
-    //    func testBase32StringEncoding() {
-    //        XCTAssertEqual(                         "".base32(upper: true, padded: true), ""                                        )
-    //        XCTAssertEqual(                        "f".base32(upper: true, padded: true), "MY======"                                )
-    //        XCTAssertEqual(                       "fo".base32(upper: true, padded: true), "MZXQ===="                                )
-    //        XCTAssertEqual(                      "foo".base32(upper: true, padded: true), "MZXW6==="                                )
-    //        XCTAssertEqual(                     "foob".base32(upper: true, padded: true), "MZXW6YQ="                                )
-    //        XCTAssertEqual(                    "fooba".base32(upper: true, padded: true), "MZXW6YTB"                                )
-    //        XCTAssertEqual(                   "foobar".base32(upper: true, padded: true), "MZXW6YTBOI======"                        )
-    //        XCTAssertEqual(               "yes mani !".base32()                         , "pfsxgidnmfxgsibb"                        )
-    //        XCTAssertEqual(              "hello world".base32()                         , "nbswy3dpeb3w64tmmq"                      )
-    //        XCTAssertEqual("Decentralize everything!!".base32()                         , "irswgzloorzgc3djpjssazlwmvzhs5dinfxgoijb")
-    //    }
+    //@Test func testBase32StringEncoding() {
+    //    #expect("".base32(upper: true, padded: true) == "")
+    //    #expect("f".base32(upper: true, padded: true) == "MY======")
+    //    #expect("fo".base32(upper: true, padded: true) == "MZXQ====")
+    //    #expect("foo".base32(upper: true, padded: true) == "MZXW6===")
+    //    #expect("foob".base32(upper: true, padded: true) == "MZXW6YQ=")
+    //    #expect("fooba".base32(upper: true, padded: true) == "MZXW6YTB")
+    //    #expect("foobar".base32(upper: true, padded: true) == "MZXW6YTBOI======")
+    //    #expect("yes mani !".base32() == "pfsxgidnmfxgsibb")
+    //    #expect("hello world".base32() == "nbswy3dpeb3w64tmmq")
+    //    #expect("Decentralize everything!!".base32() == "irswgzloorzgc3djpjssazlwmvzhs5dinfxgoijb")
+    //}
 }
