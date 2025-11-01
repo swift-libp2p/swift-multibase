@@ -19,7 +19,7 @@ import Base8
 import BaseX
 import Foundation
 
-public enum BaseEncoding: UInt8, CaseIterable, Equatable {
+public enum BaseEncoding: UInt8, CaseIterable, Equatable, Sendable {
     case identity = 000  // 0x00
     case base2 = 048  // 0 String(... radix: 2)
     case base8 = 055  // 7
