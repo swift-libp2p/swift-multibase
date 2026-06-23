@@ -6,8 +6,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/swift-libp2p/swift-bases.git",
       "state" : {
-        "revision" : "96615d4b582f9f6536d8278304ce2a64c8e5288a",
-        "version" : "0.2.0"
+        "revision" : "162f6ef3ed3ebd5954c445443d93e41d30a473da",
+        "version" : "0.2.1"
       }
     }
   ],
