@@ -211,16 +211,13 @@ public enum BaseEncoding: UInt8, CaseIterable, Equatable, Sendable {
     }
 
     public func encode(data: Data) -> String {
-        let byteString = [self.rawValue] + data
-        let stringBaseEncoding = String(bytes: [self.rawValue], encoding: String.Encoding.utf8)!
-
         var encoding = ""
         switch self {
         case .identity:
             // Identity output is the 0x00 prefix followed by the raw bytes. Because this API returns a
             // String, non-UTF8 payloads are rendered lossily (U+FFFD) rather than crashing; use the
             // Data(decoding:as: .identity) path when a lossless round-trip is required.
-            return String(decoding: byteString, as: UTF8.self)
+            return String(decoding: [self.rawValue] + data, as: UTF8.self)
         case .base2:
             encoding = data.binaryEncoded(byteSpacing: false)
         case .base8:
@@ -258,18 +255,18 @@ public enum BaseEncoding: UInt8, CaseIterable, Equatable, Sendable {
         case .base58flickr:
             encoding = BaseX.encode(data, into: .base58Flickr)
         case .base64:
-            encoding = data.base64Encoded(padded: false)
+            encoding = Base64.encode(data, variant: .standard, pad: false)
         case .base64Pad:
-            encoding = data.base64Encoded(padded: true)
+            encoding = Base64.encode(data, variant: .standard, pad: true)
         case .base64Url:
-            encoding = data.base64URLEncoded(padded: false)
+            encoding = Base64.encode(data, variant: .url, pad: false)
         case .base64UrlPad:
-            encoding = data.base64URLEncoded(padded: true)
+            encoding = Base64.encode(data, variant: .url, pad: true)
         //case .proquint:
         //    // TODO: Implement Me
         }
 
-        return stringBaseEncoding + encoding
+        return self.charPrefix + encoding
     }
 
     /// Given a Multibase compliant String, this method will attempt to extract the base prefix from the string and decode it
@@ -284,7 +281,11 @@ public enum BaseEncoding: UInt8, CaseIterable, Equatable, Sendable {
         guard let base = BaseEncoding(prefixByte: prefixByte) else {
             // Special case for Base58BTC Peer IDs, which carry no multibase prefix (e.g. "Qm…").
             if d.hasPrefix("Qm") {
-                return (base: .base58btc, data: try BaseX.decode(d, as: .base58BTC))
+                do {
+                    return (base: .base58btc, data: try BaseX.decode(d, as: .base58BTC))
+                } catch {
+                    throw MultibaseError.decodingFailed(underlying: error)
+                }
             }
             throw MultibaseError.unknownBase
         }
@@ -294,66 +295,66 @@ public enum BaseEncoding: UInt8, CaseIterable, Equatable, Sendable {
 
     /// Given an encoded String that is not Multibase compliant (aka missing the Multibase prefix) this method will attempt to decode the string in the base specified.
     public static func decode(_ encodedData: String, as base: BaseEncoding) throws -> (base: BaseEncoding, data: Data) {
-        switch base {
-        case .base2:
-            return (base: .base2, data: try Data(binaryString: encodedData))  // .binaryDecoded)
-        case .base8:
-            return (base: .base8, data: try Base8.decode(encodedData))
-        case .base10:
-            return (base: .base10, data: try BaseX.decode(encodedData, as: .base10Decimal))
-        case .base16:
-            return (base: .base16, data: try BaseX.decode(encodedData.lowercased(), as: .base16Hex))
-        case .base16Upper:
-            return (base: .base16Upper, data: try BaseX.decode(encodedData.uppercased(), as: .base16HexUpper))
-        case .base32:
-            return (base: .base32, data: try Base32.decode(encodedData))
-        case .base32Pad:
-            return (base: .base32Pad, data: try Base32.decode(encodedData))
-        case .base32Upper:
-            return (base: .base32Upper, data: try Base32.decode(encodedData))
-        case .base32PadUpper:
-            return (base: .base32PadUpper, data: try Base32.decode(encodedData))
-        case .base32Hex:
-            return (base: .base32Hex, data: try Base32.decode(encodedData, variant: .hex))
-        case .base32HexPad:
-            return (base: .base32HexPad, data: try Base32.decode(encodedData, variant: .hex))
-        case .base32HexUpper:
-            return (base: .base32HexUpper, data: try Base32.decode(encodedData, variant: .hex))
-        case .base32HexPadUpper:
-            return (base: .base32HexPadUpper, data: try Base32.decode(encodedData, variant: .hex))
-        case .base32z:
-            return (base: .base32z, data: try Base32.decode(encodedData, variant: .z))
-        case .base36:
-            return (base: .base36, data: try BaseX.decode(encodedData.lowercased(), as: .base36))
-        case .base36Upper:
-            return (base: .base36Upper, data: try BaseX.decode(encodedData.uppercased(), as: .base36Upper))
-        case .base58btc:
-            return (base: .base58btc, data: try BaseX.decode(encodedData, as: .base58BTC))
-        case .base58flickr:
-            return (base: .base58flickr, data: try BaseX.decode(encodedData, as: .base58Flickr))
-        case .base64:
-            //Ensure the non padded string is base64 compliant before initing
-            guard let d = Data(base64Encoded: encodedData.base64CompliantString) else {
-                throw MultibaseError.invalidStringEncoding
+        // Every base delegates to a swift-bases decoder that throws its own error type (Base64.Error,
+        // BaseX/Base32/Base8 errors, etc.). We funnel those into MultibaseError so consumers only ever
+        // have to catch a single, base-agnostic error type.
+        do {
+            switch base {
+            case .base2:
+                return (base: .base2, data: try Data(binaryString: encodedData))  // .binaryDecoded)
+            case .base8:
+                return (base: .base8, data: try Base8.decode(encodedData))
+            case .base10:
+                return (base: .base10, data: try BaseX.decode(encodedData, as: .base10Decimal))
+            case .base16:
+                return (base: .base16, data: try BaseX.decode(encodedData.lowercased(), as: .base16Hex))
+            case .base16Upper:
+                return (base: .base16Upper, data: try BaseX.decode(encodedData.uppercased(), as: .base16HexUpper))
+            case .base32:
+                return (base: .base32, data: try Base32.decode(encodedData))
+            case .base32Pad:
+                return (base: .base32Pad, data: try Base32.decode(encodedData))
+            case .base32Upper:
+                return (base: .base32Upper, data: try Base32.decode(encodedData))
+            case .base32PadUpper:
+                return (base: .base32PadUpper, data: try Base32.decode(encodedData))
+            case .base32Hex:
+                return (base: .base32Hex, data: try Base32.decode(encodedData, variant: .hex))
+            case .base32HexPad:
+                return (base: .base32HexPad, data: try Base32.decode(encodedData, variant: .hex))
+            case .base32HexUpper:
+                return (base: .base32HexUpper, data: try Base32.decode(encodedData, variant: .hex))
+            case .base32HexPadUpper:
+                return (base: .base32HexPadUpper, data: try Base32.decode(encodedData, variant: .hex))
+            case .base32z:
+                return (base: .base32z, data: try Base32.decode(encodedData, variant: .z))
+            case .base36:
+                return (base: .base36, data: try BaseX.decode(encodedData.lowercased(), as: .base36))
+            case .base36Upper:
+                return (base: .base36Upper, data: try BaseX.decode(encodedData.uppercased(), as: .base36Upper))
+            case .base58btc:
+                return (base: .base58btc, data: try BaseX.decode(encodedData, as: .base58BTC))
+            case .base58flickr:
+                return (base: .base58flickr, data: try BaseX.decode(encodedData, as: .base58Flickr))
+            case .base64:
+                // Base64.decode is padding-tolerant, so the unpadded (`m`) form round-trips without pre-padding.
+                return (base: .base64, try Base64.decode(encodedData, variant: .standard))
+            case .base64Pad:
+                return (base: .base64Pad, try Base64.decode(encodedData, variant: .standard))
+            case .base64Url:
+                return (base: .base64Url, try Base64.decode(encodedData, variant: .url))
+            case .base64UrlPad:
+                return (base: .base64UrlPad, try Base64.decode(encodedData, variant: .url))
+            case .identity:
+                // The payload is the raw bytes; this method receives the string without its multibase prefix.
+                return (base: .identity, data: Data(encodedData.utf8))
+            //case .proquint:
+            //    // TODO: Implement me
             }
-            return (base: .base64, data: d)
-        case .base64Pad:
-            guard let d = Data(base64Encoded: encodedData) else { throw MultibaseError.invalidStringEncoding }
-            return (base: .base64Pad, data: d)
-        case .base64Url:
-            //Ensure the non padded string is base64 compliant before initing
-            guard let d = Data(base64URLEncoded: encodedData.base64CompliantString) else {
-                throw MultibaseError.invalidStringEncoding
-            }
-            return (base: .base64Url, data: d)
-        case .base64UrlPad:
-            guard let d = Data(base64URLEncoded: encodedData) else { throw MultibaseError.invalidStringEncoding }
-            return (base: .base64UrlPad, data: d)
-        case .identity:
-            // The payload is the raw bytes; this method receives the string without its multibase prefix.
-            return (base: .identity, data: Data(encodedData.utf8))
-        //case .proquint:
-        //    // TODO: Implement me
+        } catch let error as MultibaseError {
+            throw error
+        } catch {
+            throw MultibaseError.decodingFailed(underlying: error)
         }
     }
 
@@ -371,6 +372,9 @@ public enum BaseEncoding: UInt8, CaseIterable, Equatable, Sendable {
     public enum MultibaseError: Error, LocalizedError {
         case unknownBase
         case invalidStringEncoding
+        /// A base-specific decoder rejected the input (e.g. an invalid character for the base's alphabet).
+        /// The underlying swift-bases error is preserved for diagnostics.
+        case decodingFailed(underlying: any Error)
 
         public var errorDescription: String? {
             switch self {
@@ -378,6 +382,8 @@ public enum BaseEncoding: UInt8, CaseIterable, Equatable, Sendable {
                 return "The string is empty or its leading character is not a recognized multibase prefix."
             case .invalidStringEncoding:
                 return "The data could not be represented in the requested string encoding."
+            case .decodingFailed(let underlying):
+                return "The payload could not be decoded in the requested base: \(underlying)"
             }
         }
     }
@@ -412,7 +418,7 @@ extension String {
     }
 
     public func encodeUTF8(base: BaseEncoding) -> String {
-        base.encode(data: self.data(using: .utf8)!)
+        base.encode(data: self.data(using: .utf8) ?? Data())
     }
 
     public func encodeASCII(base: BaseEncoding) -> String {
