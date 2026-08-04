@@ -282,6 +282,21 @@ struct MultibaseTests {
         #expect(multibase2.string == "Decentralize everything!!")
     }
 
+    @Test func testBase32StringEncoding() {
+        #expect("".encode(as: .base32PadUpper).dropFirst() == "")
+        #expect("f".encode(as: .base32PadUpper).dropFirst() == "MY======")
+        #expect("fo".encode(as: .base32PadUpper).dropFirst() == "MZXQ====")
+        #expect("foo".encode(as: .base32PadUpper).dropFirst() == "MZXW6===")
+        #expect("foob".encode(as: .base32PadUpper).dropFirst() == "MZXW6YQ=")
+        #expect("fooba".encode(as: .base32PadUpper).dropFirst() == "MZXW6YTB")
+        #expect("foobar".encode(as: .base32PadUpper).dropFirst() == "MZXW6YTBOI======")
+        #expect("yes mani !".encode(as: .base32).dropFirst() == "pfsxgidnmfxgsibb")
+        #expect("hello world".encode(as: .base32).dropFirst() == "nbswy3dpeb3w64tmmq")
+        #expect(
+            "Decentralize everything!!".encode(as: .base32).dropFirst() == "irswgzloorzgc3djpjssazlwmvzhs5dinfxgoijb"
+        )
+    }
+
     @Test func testBase32Hex() throws {
         let testString = "yes mani !"
         let testString2 = "Decentralize everything!!"
@@ -955,16 +970,57 @@ struct MultibaseTests {
         #expect(testString.encodeUTF8(base: .base64UrlPad) == CaseTwoLeadingZeros["base64urlpad"])
     }
 
-    //@Test func testBase32StringEncoding() {
-    //    #expect("".base32(upper: true, padded: true) == "")
-    //    #expect("f".base32(upper: true, padded: true) == "MY======")
-    //    #expect("fo".base32(upper: true, padded: true) == "MZXQ====")
-    //    #expect("foo".base32(upper: true, padded: true) == "MZXW6===")
-    //    #expect("foob".base32(upper: true, padded: true) == "MZXW6YQ=")
-    //    #expect("fooba".base32(upper: true, padded: true) == "MZXW6YTB")
-    //    #expect("foobar".base32(upper: true, padded: true) == "MZXW6YTBOI======")
-    //    #expect("yes mani !".base32() == "pfsxgidnmfxgsibb")
-    //    #expect("hello world".base32() == "nbswy3dpeb3w64tmmq")
-    //    #expect("Decentralize everything!!".base32() == "irswgzloorzgc3djpjssazlwmvzhs5dinfxgoijb")
-    //}
+    @Test func testIdentityRoundTrip() throws {
+        let testString = "yes mani !"
+
+        // Encode with the identity multibase (0x00 prefix + raw bytes).
+        let encoded = testString.encodeUTF8(base: .identity)
+        #expect(encoded == "\u{00}" + testString)
+
+        // Decode must not throw and must round-trip (previously threw .unknownBase).
+        let decoded = try BaseEncoding.decodeIntoString(encoded)
+        #expect(decoded.base == .identity)
+        #expect(decoded.string == testString)
+    }
+
+    @Test func testIdentityBinaryPayloadDoesNotCrash() {
+        // Non-UTF8 bytes through identity encode must not crash (previously force-unwrapped String(bytes:)).
+        let bytes: [UInt8] = [0x00, 0xFF, 0x10, 0x80]
+        let encoded = bytes.asString(base: .identity, withMultibasePrefix: true)
+        _ = encoded  // reaching here without a crash is the assertion
+    }
+
+    @Test func testDecodeIntoStringThrowsOnNonUTF8() {
+        // A base16 string decoding to non-UTF8 bytes must throw rather than crash on the String(data:) unwrap.
+        let nonUTF8Hex = "fff"  // 'f' prefix + "ff" => byte 0xFF, which is not valid UTF8
+        #expect(throws: BaseEncoding.MultibaseError.self) {
+            _ = try BaseEncoding.decodeIntoString(nonUTF8Hex)
+        }
+    }
+
+    @Test func testLiteralBackslashX00PayloadRoundTrips() throws {
+        // Data literally starting with the ASCII bytes «\x00» must not be corrupted (old leading-zero bug).
+        let testString = "\\x00hello"
+        let encoded = testString.encodeUTF8(base: .base16)
+        let decoded = try BaseEncoding.decodeIntoString(encoded)
+        #expect(decoded.base == .base16)
+        #expect(decoded.string == testString)
+    }
+
+    @Test func testEncodeASCIINonASCIIDoesNotCrash() {
+        // Non-ASCII input to encodeASCII must not crash (previously force-unwrapped the .ascii conversion).
+        let encoded = "café".encodeASCII(base: .base16)
+        _ = encoded  // reaching here without a crash is the assertion
+    }
+
+    @Test func testPrefixLookupAndValidation() {
+        #expect(BaseEncoding(prefix: "f") == .base16)
+        #expect(BaseEncoding(prefix: "m") == .base64)
+        #expect(BaseEncoding(prefixByte: 0x00) == .identity)
+        #expect(BaseEncoding(prefix: "😀") == nil)
+
+        #expect(BaseEncoding.base16.isValid("48656c6c6f"))
+        #expect(!BaseEncoding.base16.isValid("xyz"))
+        #expect(BaseEncoding.identity.isValid("anything at all"))
+    }
 }

@@ -45,7 +45,7 @@ public enum BaseEncoding: UInt8, CaseIterable, Equatable, Sendable {
     case base64UrlPad = 085  // U
     //case proquint          = 113 // q
 
-    var alphabet: String {
+    public var alphabet: String {
         switch self {
         case .identity: return ""
         case .base2: return "01"
@@ -188,30 +188,39 @@ public enum BaseEncoding: UInt8, CaseIterable, Equatable, Sendable {
         String(UnicodeScalar(self.rawValue))
     }
 
-    public func encode(data rawData: Data) -> String {
-        let byteString = [self.rawValue] + rawData
+    /// Resolves a base encoding from its multibase prefix byte (identical to its raw value).
+    public init?(prefixByte: UInt8) {
+        self.init(rawValue: prefixByte)
+    }
+
+    /// Resolves a base encoding from its multibase prefix character (e.g. `"f"` -> `.base16`).
+    public init?(prefix: Character) {
+        guard let ascii = prefix.asciiValue else { return nil }
+        self.init(rawValue: ascii)
+    }
+
+    /// Returns `true` when every character of `string` belongs to this base's canonical alphabet.
+    ///
+    /// - Note: `string` is expected to be the encoded body *without* the multibase prefix. The check
+    ///   is case-sensitive against the canonical alphabet, and `.identity` (which has no alphabet
+    ///   constraint) always returns `true`.
+    public func isValid(_ string: String) -> Bool {
+        if self == .identity { return true }
+        let allowed = Set(self.alphabet)
+        return string.allSatisfy { allowed.contains($0) }
+    }
+
+    public func encode(data: Data) -> String {
+        let byteString = [self.rawValue] + data
         let stringBaseEncoding = String(bytes: [self.rawValue], encoding: String.Encoding.utf8)!
-
-        let leadingZero = Array("\\x00".utf8)
-        var zeroes = 0
-        var data = rawData
-        while data.starts(with: leadingZero) {
-            zeroes += 1
-            data = data.dropFirst(leadingZero.count)
-        }
-        if zeroes > 0 { print("We detected \(zeroes) leading zeroes and removed them...") }
-
-        if .base16 == self || .base16Upper == self {
-            zeroes = zeroes * 2
-        }
-        if zeroes > 0 {
-            data.insert(contentsOf: [UInt8](repeating: 0, count: zeroes), at: data.startIndex)
-        }
 
         var encoding = ""
         switch self {
         case .identity:
-            return String(bytes: byteString, encoding: String.Encoding.utf8)!
+            // Identity output is the 0x00 prefix followed by the raw bytes. Because this API returns a
+            // String, non-UTF8 payloads are rendered lossily (U+FFFD) rather than crashing; use the
+            // Data(decoding:as: .identity) path when a lossless round-trip is required.
+            return String(decoding: byteString, as: UTF8.self)
         case .base2:
             encoding = data.binaryEncoded(byteSpacing: false)
         case .base8:
@@ -265,9 +274,22 @@ public enum BaseEncoding: UInt8, CaseIterable, Equatable, Sendable {
 
     /// Given a Multibase compliant String, this method will attempt to extract the base prefix from the string and decode it
     public static func decode(_ d: String) throws -> (base: BaseEncoding, data: Data) {
-        let base = d.baseEncoding
-        let encodedData = base == .identity ? d : String(d.dropFirst())
-        return try self.decode(encodedData, as: base)
+        guard let prefixByte = d.utf8.first else { throw MultibaseError.unknownBase }
+
+        // Identity is a NUL (0x00) prefix followed by the raw bytes; the payload is everything after it.
+        if prefixByte == BaseEncoding.identity.rawValue {
+            return (base: .identity, data: Data(d.utf8.dropFirst()))
+        }
+
+        guard let base = BaseEncoding(prefixByte: prefixByte) else {
+            // Special case for Base58BTC Peer IDs, which carry no multibase prefix (e.g. "Qm…").
+            if d.hasPrefix("Qm") {
+                return (base: .base58btc, data: try BaseX.decode(d, as: .base58BTC))
+            }
+            throw MultibaseError.unknownBase
+        }
+
+        return try self.decode(String(d.dropFirst()), as: base)
     }
 
     /// Given an encoded String that is not Multibase compliant (aka missing the Multibase prefix) this method will attempt to decode the string in the base specified.
@@ -327,14 +349,11 @@ public enum BaseEncoding: UInt8, CaseIterable, Equatable, Sendable {
         case .base64UrlPad:
             guard let d = Data(base64URLEncoded: encodedData) else { throw MultibaseError.invalidStringEncoding }
             return (base: .base64UrlPad, data: d)
+        case .identity:
+            // The payload is the raw bytes; this method receives the string without its multibase prefix.
+            return (base: .identity, data: Data(encodedData.utf8))
         //case .proquint:
         //    // TODO: Implement me
-        default:
-            //Special Case For Base58BTC Peer IDs
-            if encodedData.hasPrefix("Qm") {
-                return (base: .base58btc, data: try BaseX.decode(encodedData, as: .base58BTC))
-            }
-            throw MultibaseError.unknownBase
         }
     }
 
@@ -343,12 +362,24 @@ public enum BaseEncoding: UInt8, CaseIterable, Equatable, Sendable {
         using encoding: String.Encoding = .utf8
     ) throws -> (base: BaseEncoding, string: String) {
         let (base, data) = try self.decode(encodedData)
-        return (base: base, string: String(data: data, encoding: encoding)!)
+        guard let string = String(data: data, encoding: encoding) else {
+            throw MultibaseError.invalidStringEncoding
+        }
+        return (base: base, string: string)
     }
 
-    public enum MultibaseError: Error {
+    public enum MultibaseError: Error, LocalizedError {
         case unknownBase
         case invalidStringEncoding
+
+        public var errorDescription: String? {
+            switch self {
+            case .unknownBase:
+                return "The string is empty or its leading character is not a recognized multibase prefix."
+            case .invalidStringEncoding:
+                return "The data could not be represented in the requested string encoding."
+            }
+        }
     }
 }
 
@@ -376,7 +407,7 @@ extension String {
     }
 
     public var baseEncoding: BaseEncoding {
-        guard let base = Array(self.utf8).first else { return .identity }
+        guard let base = self.utf8.first else { return .identity }
         return BaseEncoding(rawValue: base) ?? .identity
     }
 
@@ -385,7 +416,7 @@ extension String {
     }
 
     public func encodeASCII(base: BaseEncoding) -> String {
-        base.encode(data: self.data(using: .ascii)!)
+        base.encode(data: self.data(using: .ascii) ?? Data())
     }
 
     /// Takes a string, converts it to data using the specified String.Encoding and then encodes that data into the specified base
