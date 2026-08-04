@@ -12,6 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
+import Foundation
 import Testing
 
 @testable import Multibase
@@ -1022,5 +1023,58 @@ struct MultibaseTests {
         #expect(BaseEncoding.base16.isValid("48656c6c6f"))
         #expect(!BaseEncoding.base16.isValid("xyz"))
         #expect(BaseEncoding.identity.isValid("anything at all"))
+    }
+
+    @Test func testEmptyInputRoundTrips() throws {
+        // Every base must round-trip empty data via the public Data API.
+        for base in BaseEncoding.allCases {
+            let encoded = Data().asString(base: base, withMultibasePrefix: true)
+            let (decodedBase, decoded) = try BaseEncoding.decode(encoded)
+            #expect(decodedBase == base)
+            #expect(decoded.isEmpty)
+        }
+    }
+
+    @Test func testFullByteRangeRoundTrips() throws {
+        // 0x00...0xFF exercises leading zeros, high bytes, and non-UTF8 payloads.
+        let blob = Data((0...255).map { UInt8($0) })
+        for base in BaseEncoding.allCases where base != .identity {
+            let encoded = blob.asString(base: base, withMultibasePrefix: true)
+            let (_, decoded) = try BaseEncoding.decode(encoded)
+            #expect(decoded == blob, "round-trip failed for \(base)")
+        }
+    }
+
+    @Test func testBase64InvalidCharacterThrowsMultibaseError() {
+        // Base-specific decode failures must surface as MultibaseError, not Base64.Error.
+        #expect(throws: BaseEncoding.MultibaseError.self) {
+            _ = try BaseEncoding.decode("m****")  // '*' is not in the base64 alphabet
+        }
+        #expect(throws: BaseEncoding.MultibaseError.self) {
+            _ = try BaseEncoding.decode("u@@@@")  // '@' is not in the base64url alphabet
+        }
+    }
+
+    @Test func testBase64PaddingTolerance() throws {
+        // Padded variant decoding an unpadded body, and vice-versa.
+        let unpaddedIntoPad = try BaseEncoding.decode("MZm9vYg")  // 'M' = base64Pad, but no '='
+        #expect(unpaddedIntoPad.data == Data("foob".utf8))
+
+        let paddedIntoUnpadded = try BaseEncoding.decode("mZm9vYg==")  // 'm' = base64, with '='
+        #expect(paddedIntoUnpadded.data == Data("foob".utf8))
+    }
+
+    @Test func testDecodeUnknownPrefixThrows() {
+        #expect(throws: BaseEncoding.MultibaseError.self) {
+            _ = try BaseEncoding.decode("!not-a-multibase-prefix")
+        }
+    }
+
+    @Test func testBase58BTCPeerIDPrefix() throws {
+        // The implicit "Qm…" (no multibase prefix) base58btc path.
+        let peerID = "QmYwAPJzv5CZsnA625s3Xf2nemtYgPpHdWEz79ojWnPbdG"
+        let (base, data) = try BaseEncoding.decode(peerID)
+        #expect(base == .base58btc)
+        #expect(!data.isEmpty)
     }
 }
