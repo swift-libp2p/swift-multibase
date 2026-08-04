@@ -281,7 +281,7 @@ struct MultibaseTests {
         #expect(multibase2.base == .base32PadUpper)
         #expect(multibase2.string == "Decentralize everything!!")
     }
-    
+
     @Test func testBase32StringEncoding() {
         #expect("".encode(as: .base32PadUpper).dropFirst() == "")
         #expect("f".encode(as: .base32PadUpper).dropFirst() == "MY======")
@@ -292,7 +292,9 @@ struct MultibaseTests {
         #expect("foobar".encode(as: .base32PadUpper).dropFirst() == "MZXW6YTBOI======")
         #expect("yes mani !".encode(as: .base32).dropFirst() == "pfsxgidnmfxgsibb")
         #expect("hello world".encode(as: .base32).dropFirst() == "nbswy3dpeb3w64tmmq")
-        #expect("Decentralize everything!!".encode(as: .base32).dropFirst() == "irswgzloorzgc3djpjssazlwmvzhs5dinfxgoijb")
+        #expect(
+            "Decentralize everything!!".encode(as: .base32).dropFirst() == "irswgzloorzgc3djpjssazlwmvzhs5dinfxgoijb"
+        )
     }
 
     @Test func testBase32Hex() throws {
