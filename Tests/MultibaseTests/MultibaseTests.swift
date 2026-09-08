@@ -2,7 +2,7 @@
 //
 // This source file is part of the swift-libp2p open source project
 //
-// Copyright (c) 2022-2025 swift-libp2p project authors
+// Copyright (c) 2022-2026 swift-libp2p project authors
 // Licensed under MIT
 //
 // See LICENSE for license information
@@ -994,7 +994,7 @@ struct MultibaseTests {
     @Test func testDecodeIntoStringThrowsOnNonUTF8() {
         // A base16 string decoding to non-UTF8 bytes must throw rather than crash on the String(data:) unwrap.
         let nonUTF8Hex = "fff"  // 'f' prefix + "ff" => byte 0xFF, which is not valid UTF8
-        #expect(throws: BaseEncoding.MultibaseError.self) {
+        #expect(throws: MultibaseError.self) {
             _ = try BaseEncoding.decodeIntoString(nonUTF8Hex)
         }
     }
@@ -1047,10 +1047,10 @@ struct MultibaseTests {
 
     @Test func testBase64InvalidCharacterThrowsMultibaseError() {
         // Base-specific decode failures must surface as MultibaseError, not Base64.Error.
-        #expect(throws: BaseEncoding.MultibaseError.self) {
+        #expect(throws: MultibaseError.self) {
             _ = try BaseEncoding.decode("m****")  // '*' is not in the base64 alphabet
         }
-        #expect(throws: BaseEncoding.MultibaseError.self) {
+        #expect(throws: MultibaseError.self) {
             _ = try BaseEncoding.decode("u@@@@")  // '@' is not in the base64url alphabet
         }
     }
@@ -1065,7 +1065,7 @@ struct MultibaseTests {
     }
 
     @Test func testDecodeUnknownPrefixThrows() {
-        #expect(throws: BaseEncoding.MultibaseError.self) {
+        #expect(throws: MultibaseError.self) {
             _ = try BaseEncoding.decode("!not-a-multibase-prefix")
         }
     }

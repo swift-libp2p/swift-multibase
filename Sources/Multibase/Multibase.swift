@@ -2,7 +2,7 @@
 //
 // This source file is part of the swift-libp2p open source project
 //
-// Copyright (c) 2022-2025 swift-libp2p project authors
+// Copyright (c) 2022-2026 swift-libp2p project authors
 // Licensed under MIT
 //
 // See LICENSE for license information
@@ -368,25 +368,6 @@ public enum BaseEncoding: UInt8, CaseIterable, Equatable, Sendable {
         }
         return (base: base, string: string)
     }
-
-    public enum MultibaseError: Error, LocalizedError {
-        case unknownBase
-        case invalidStringEncoding
-        /// A base-specific decoder rejected the input (e.g. an invalid character for the base's alphabet).
-        /// The underlying swift-bases error is preserved for diagnostics.
-        case decodingFailed(underlying: any Error)
-
-        public var errorDescription: String? {
-            switch self {
-            case .unknownBase:
-                return "The string is empty or its leading character is not a recognized multibase prefix."
-            case .invalidStringEncoding:
-                return "The data could not be represented in the requested string encoding."
-            case .decodingFailed(let underlying):
-                return "The payload could not be decoded in the requested base: \(underlying)"
-            }
-        }
-    }
 }
 
 extension String {
@@ -407,7 +388,7 @@ extension String {
     ) throws {
         let d = try Data(decoding: encodedString, as: base)
         guard let str = String(data: d, encoding: stringEncoding) else {
-            throw BaseEncoding.MultibaseError.invalidStringEncoding
+            throw MultibaseError.invalidStringEncoding
         }
         self = str
     }
