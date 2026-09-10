@@ -83,6 +83,16 @@ extension Collection<UInt8> {
         else { throw MultibaseError.unknownBase }
         return scalar
     }
+
+    /// Encodes these bytes in the given base.
+    ///
+    /// - Parameter base: The `base` to encode these bytes into.
+    /// - Parameter prefix: Whether to include the multibase prefix character. Defaults to
+    ///   `false`.
+    /// - Returns: These bytes encoded in the specified base and returned as a UTF-8 String
+    public func asString(base: BaseEncoding, withMultibasePrefix prefix: Bool = false) -> String {
+        base.encode(self, withPrefix: prefix)
+    }
 }
 
 // MARK: - Strings
