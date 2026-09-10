@@ -3,7 +3,7 @@
 //
 // This source file is part of the swift-libp2p open source project
 //
-// Copyright (c) 2022-2025 swift-libp2p project authors
+// Copyright (c) 2022-2026 swift-libp2p project authors
 // Licensed under MIT
 //
 // See LICENSE for license information
@@ -26,7 +26,7 @@ let package = Package(
     ],
     dependencies: [
         // Dependencies declare other packages that this package depends on.
-        .package(url: "https://github.com/swift-libp2p/swift-bases.git", .upToNextMinor(from: "0.3.0"))
+        .package(url: "https://github.com/swift-libp2p/swift-bases.git", .upToNextMinor(from: "0.4.0"))
     ],
     targets: [
         // Targets are the basic building blocks of a package. A target can define a module or a test suite.
@@ -34,11 +34,8 @@ let package = Package(
         .target(
             name: "Multibase",
             dependencies: [
-                .product(name: "Base2", package: "swift-bases"),
-                .product(name: "Base8", package: "swift-bases"),
-                .product(name: "BaseX", package: "swift-bases"),
-                .product(name: "Base32", package: "swift-bases"),
-                .product(name: "Base64", package: "swift-bases"),
+                // `Bases` re-exports every base module.
+                .product(name: "Bases", package: "swift-bases")
             ]
         ),
         .testTarget(
