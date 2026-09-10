@@ -107,6 +107,12 @@ let CaseTwoLeadingZeros = [
     "base64urlpad": "UAAB5ZXMgbWFuaSAh",
 ]
 
+/// Decodes a multibase string and renders the payload as UTF-8 text.
+private func decodeText(_ encoded: some StringProtocol) throws -> (base: BaseEncoding, string: String) {
+    let (base, bytes) = try encoded.multibase()
+    return (base: base, string: String(decoding: bytes, as: UTF8.self))
+}
+
 @Suite("Multibase Tests")
 struct MultibaseTests {
 
@@ -115,19 +121,19 @@ struct MultibaseTests {
         let testString2 = "Decentralize everything!!"
 
         //Base2
-        #expect(testString.encodeASCII(base: .base2) == BasicTests["base2"])  //BasicTests["base2"])
+        #expect(testString.multibaseEncoded(.base2) == BasicTests["base2"])  //BasicTests["base2"])
         #expect(
-            testString2.encodeUTF8(base: .base2)
+            testString2.multibaseEncoded(.base2)
                 == "001000100011001010110001101100101011011100111010001110010011000010110110001101001011110100110010100100000011001010111011001100101011100100111100101110100011010000110100101101110011001110010000100100001"
         )
 
-        let multibase1 = try BaseEncoding.decodeIntoString(
+        let multibase1 = try decodeText(
             "001111001011001010111001100100000011011010110000101101110011010010010000000100001"
         )
         #expect(multibase1.base == .base2)
         #expect(multibase1.string == "yes mani !")
 
-        let multibase2 = try BaseEncoding.decodeIntoString(
+        let multibase2 = try decodeText(
             "001000100011001010110001101100101011011100111010001110010011000010110110001101001011110100110010100100000011001010111011001100101011100100111100101110100011010000110100101101110011001110010000100100001"
         )
         #expect(multibase2.base == .base2)
@@ -139,17 +145,17 @@ struct MultibaseTests {
         let testString2 = "Decentralize everything!!"
 
         //Base 8 (3 bits per char)
-        #expect(testString.encodeUTF8(base: .base8) == BasicTests["base8"])
+        #expect(testString.multibaseEncoded(.base8) == BasicTests["base8"])
         #expect(
-            testString2.encodeUTF8(base: .base8)
+            testString2.multibaseEncoded(.base8)
                 == "72106254331267164344605543227514510062566312711713506415133463441102"
         )
 
-        let multibase1 = try BaseEncoding.decodeIntoString("7362625631006654133464440102")
+        let multibase1 = try decodeText("7362625631006654133464440102")
         #expect(multibase1.base == .base8)
         #expect(multibase1.string == "yes mani !")
 
-        let multibase2 = try BaseEncoding.decodeIntoString(
+        let multibase2 = try decodeText(
             "72106254331267164344605543227514510062566312711713506415133463441102"
         )
         #expect(multibase2.base == .base8)
@@ -161,17 +167,17 @@ struct MultibaseTests {
         let testString2 = "Decentralize everything!!"
 
         // Base 10 (4 bits per character) (works with the Base58 algo using BigInt)
-        #expect(testString.encodeUTF8(base: .base10) == BasicTests["base10"])
+        #expect(testString.multibaseEncoded(.base10) == BasicTests["base10"])
         #expect(
-            testString2.encodeUTF8(base: .base10)
+            testString2.multibaseEncoded(.base10)
                 == "9429328951066508984658627669258025763026247056774804621697313"
         )
 
-        let multibase1 = try BaseEncoding.decodeIntoString("9573277761329450583662625")
+        let multibase1 = try decodeText("9573277761329450583662625")
         #expect(multibase1.base == .base10)
         #expect(multibase1.string == "yes mani !")
 
-        let multibase2 = try BaseEncoding.decodeIntoString(
+        let multibase2 = try decodeText(
             "9429328951066508984658627669258025763026247056774804621697313"
         )
         #expect(multibase2.base == .base10)
@@ -183,14 +189,14 @@ struct MultibaseTests {
         let testString2 = "Decentralize everything!!"
 
         // Base 16
-        #expect(testString.encodeUTF8(base: .base16) == BasicTests["base16"])
-        #expect(testString2.encodeUTF8(base: .base16) == "f446563656e7472616c697a652065766572797468696e672121")
+        #expect(testString.multibaseEncoded(.base16) == BasicTests["base16"])
+        #expect(testString2.multibaseEncoded(.base16) == "f446563656e7472616c697a652065766572797468696e672121")
 
-        let multibase1 = try BaseEncoding.decodeIntoString("f796573206d616e692021")
+        let multibase1 = try decodeText("f796573206d616e692021")
         #expect(multibase1.base == .base16)
         #expect(multibase1.string == "yes mani !")
 
-        let multibase2 = try BaseEncoding.decodeIntoString("f446563656e7472616c697A652065766572797468696e672121")
+        let multibase2 = try decodeText("f446563656e7472616c697A652065766572797468696e672121")
         #expect(multibase2.base == .base16)
         #expect(multibase2.string == "Decentralize everything!!")
     }
@@ -200,17 +206,17 @@ struct MultibaseTests {
         let testString2 = "Decentralize everything!!"
 
         // Base 16
-        #expect(testString.encodeUTF8(base: .base16Upper) == BasicTests["base16upper"])
+        #expect(testString.multibaseEncoded(.base16Upper) == BasicTests["base16upper"])
         #expect(
-            testString2.encodeUTF8(base: .base16Upper)
+            testString2.multibaseEncoded(.base16Upper)
                 == "F446563656E7472616C697A652065766572797468696E672121"
         )
 
-        let multibase1 = try BaseEncoding.decodeIntoString("F796573206d616e692021")
+        let multibase1 = try decodeText("F796573206d616e692021")
         #expect(multibase1.base == .base16Upper)
         #expect(multibase1.string == "yes mani !")
 
-        let multibase2 = try BaseEncoding.decodeIntoString("F446563656e7472616c697a652065766572797468696e672121")
+        let multibase2 = try decodeText("F446563656e7472616c697a652065766572797468696e672121")
         #expect(multibase2.base == .base16Upper)
         #expect(multibase2.string == "Decentralize everything!!")
     }
@@ -220,14 +226,14 @@ struct MultibaseTests {
         let testString2 = "Decentralize everything!!"
 
         //Base32
-        #expect(testString.encodeUTF8(base: .base32) == BasicTests["base32"])
-        #expect(testString2.encodeUTF8(base: .base32) == "birswgzloorzgc3djpjssazlwmvzhs5dinfxgoijb")
+        #expect(testString.multibaseEncoded(.base32) == BasicTests["base32"])
+        #expect(testString2.multibaseEncoded(.base32) == "birswgzloorzgc3djpjssazlwmvzhs5dinfxgoijb")
 
-        let multibase1 = try BaseEncoding.decodeIntoString("bpfsxgidnmfxgsibb")
+        let multibase1 = try decodeText("bpfsxgidnmfxgsibb")
         #expect(multibase1.base == .base32)
         #expect(multibase1.string == "yes mani !")
 
-        let multibase2 = try BaseEncoding.decodeIntoString("birswgzloorzgc3djpjssazlwmvzhs5dinfxgoijb")
+        let multibase2 = try decodeText("birswgzloorzgc3djpjssazlwmvzhs5dinfxgoijb")
         #expect(multibase2.base == .base32)
         #expect(multibase2.string == "Decentralize everything!!")
     }
@@ -237,14 +243,14 @@ struct MultibaseTests {
         let testString2 = "Decentralize everything!!"
 
         //Base32Upper
-        #expect(testString.encodeUTF8(base: .base32Upper) == BasicTests["base32upper"])
-        #expect(testString2.encodeUTF8(base: .base32Upper) == "BIRSWGZLOORZGC3DJPJSSAZLWMVZHS5DINFXGOIJB")
+        #expect(testString.multibaseEncoded(.base32Upper) == BasicTests["base32upper"])
+        #expect(testString2.multibaseEncoded(.base32Upper) == "BIRSWGZLOORZGC3DJPJSSAZLWMVZHS5DINFXGOIJB")
 
-        let multibase1 = try BaseEncoding.decodeIntoString("BPFSXGIDNMFXGSIBB")
+        let multibase1 = try decodeText("BPFSXGIDNMFXGSIBB")
         #expect(multibase1.base == .base32Upper)
         #expect(multibase1.string == "yes mani !")
 
-        let multibase2 = try BaseEncoding.decodeIntoString("BIRSWGZLOORZGC3DJPJSSAZLWMVZHS5DINFXGOIJB")
+        let multibase2 = try decodeText("BIRSWGZLOORZGC3DJPJSSAZLWMVZHS5DINFXGOIJB")
         #expect(multibase2.base == .base32Upper)
         #expect(multibase2.string == "Decentralize everything!!")
     }
@@ -254,14 +260,14 @@ struct MultibaseTests {
         let testString2 = "Decentralize everything!!"
 
         //Base32Pad
-        #expect(testString.encodeUTF8(base: .base32Pad) == BasicTests["base32pad"])
-        #expect(testString2.encodeUTF8(base: .base32Pad) == "cirswgzloorzgc3djpjssazlwmvzhs5dinfxgoijb")
+        #expect(testString.multibaseEncoded(.base32Pad) == BasicTests["base32pad"])
+        #expect(testString2.multibaseEncoded(.base32Pad) == "cirswgzloorzgc3djpjssazlwmvzhs5dinfxgoijb")
 
-        let multibase1 = try BaseEncoding.decodeIntoString("cpfsxgidnmfxgsibb")
+        let multibase1 = try decodeText("cpfsxgidnmfxgsibb")
         #expect(multibase1.base == .base32Pad)
         #expect(multibase1.string == "yes mani !")
 
-        let multibase2 = try BaseEncoding.decodeIntoString("cirswgzloorzgc3djpjssazlwmvzhs5dinfxgoijb")
+        let multibase2 = try decodeText("cirswgzloorzgc3djpjssazlwmvzhs5dinfxgoijb")
         #expect(multibase2.base == .base32Pad)
         #expect(multibase2.string == "Decentralize everything!!")
     }
@@ -271,30 +277,31 @@ struct MultibaseTests {
         let testString2 = "Decentralize everything!!"
 
         //Base32PadUpper
-        #expect(testString.encodeUTF8(base: .base32PadUpper) == BasicTests["base32padupper"])
-        #expect(testString2.encodeUTF8(base: .base32PadUpper) == "CIRSWGZLOORZGC3DJPJSSAZLWMVZHS5DINFXGOIJB")
+        #expect(testString.multibaseEncoded(.base32PadUpper) == BasicTests["base32padupper"])
+        #expect(testString2.multibaseEncoded(.base32PadUpper) == "CIRSWGZLOORZGC3DJPJSSAZLWMVZHS5DINFXGOIJB")
 
-        let multibase1 = try BaseEncoding.decodeIntoString("CPFSXGIDNMFXGSIBB")
+        let multibase1 = try decodeText("CPFSXGIDNMFXGSIBB")
         #expect(multibase1.base == .base32PadUpper)
         #expect(multibase1.string == "yes mani !")
 
-        let multibase2 = try BaseEncoding.decodeIntoString("CIRSWGZLOORZGC3DJPJSSAZLWMVZHS5DINFXGOIJB")
+        let multibase2 = try decodeText("CIRSWGZLOORZGC3DJPJSSAZLWMVZHS5DINFXGOIJB")
         #expect(multibase2.base == .base32PadUpper)
         #expect(multibase2.string == "Decentralize everything!!")
     }
 
     @Test func testBase32StringEncoding() {
-        #expect("".encode(as: .base32PadUpper).dropFirst() == "")
-        #expect("f".encode(as: .base32PadUpper).dropFirst() == "MY======")
-        #expect("fo".encode(as: .base32PadUpper).dropFirst() == "MZXQ====")
-        #expect("foo".encode(as: .base32PadUpper).dropFirst() == "MZXW6===")
-        #expect("foob".encode(as: .base32PadUpper).dropFirst() == "MZXW6YQ=")
-        #expect("fooba".encode(as: .base32PadUpper).dropFirst() == "MZXW6YTB")
-        #expect("foobar".encode(as: .base32PadUpper).dropFirst() == "MZXW6YTBOI======")
-        #expect("yes mani !".encode(as: .base32).dropFirst() == "pfsxgidnmfxgsibb")
-        #expect("hello world".encode(as: .base32).dropFirst() == "nbswy3dpeb3w64tmmq")
+        #expect("".multibaseEncoded(.base32PadUpper, withPrefix: false) == "")
+        #expect("f".multibaseEncoded(.base32PadUpper, withPrefix: false) == "MY======")
+        #expect("fo".multibaseEncoded(.base32PadUpper, withPrefix: false) == "MZXQ====")
+        #expect("foo".multibaseEncoded(.base32PadUpper, withPrefix: false) == "MZXW6===")
+        #expect("foob".multibaseEncoded(.base32PadUpper, withPrefix: false) == "MZXW6YQ=")
+        #expect("fooba".multibaseEncoded(.base32PadUpper, withPrefix: false) == "MZXW6YTB")
+        #expect("foobar".multibaseEncoded(.base32PadUpper, withPrefix: false) == "MZXW6YTBOI======")
+        #expect("yes mani !".multibaseEncoded(.base32, withPrefix: false) == "pfsxgidnmfxgsibb")
+        #expect("hello world".multibaseEncoded(.base32, withPrefix: false) == "nbswy3dpeb3w64tmmq")
         #expect(
-            "Decentralize everything!!".encode(as: .base32).dropFirst() == "irswgzloorzgc3djpjssazlwmvzhs5dinfxgoijb"
+            "Decentralize everything!!".multibaseEncoded(.base32, withPrefix: false)
+                == "irswgzloorzgc3djpjssazlwmvzhs5dinfxgoijb"
         )
     }
 
@@ -303,14 +310,14 @@ struct MultibaseTests {
         let testString2 = "Decentralize everything!!"
 
         //Base32PadUpper
-        #expect(testString.encodeUTF8(base: .base32Hex) == BasicTests["base32hex"])
-        #expect(testString2.encodeUTF8(base: .base32Hex) == "v8him6pbeehp62r39f9ii0pbmclp7it38d5n6e891")
+        #expect(testString.multibaseEncoded(.base32Hex) == BasicTests["base32hex"])
+        #expect(testString2.multibaseEncoded(.base32Hex) == "v8him6pbeehp62r39f9ii0pbmclp7it38d5n6e891")
 
-        let multibase1 = try BaseEncoding.decodeIntoString("vf5in683dc5n6i811")
+        let multibase1 = try decodeText("vf5in683dc5n6i811")
         #expect(multibase1.base == .base32Hex)
         #expect(multibase1.string == "yes mani !")
 
-        let multibase2 = try BaseEncoding.decodeIntoString("v8him6pbeehp62r39f9ii0pbmclp7it38d5n6e891")
+        let multibase2 = try decodeText("v8him6pbeehp62r39f9ii0pbmclp7it38d5n6e891")
         #expect(multibase2.base == .base32Hex)
         #expect(multibase2.string == "Decentralize everything!!")
     }
@@ -320,14 +327,14 @@ struct MultibaseTests {
         let testString2 = "Decentralize everything!!"
 
         //Base32PadUpper
-        #expect(testString.encodeUTF8(base: .base32HexUpper) == BasicTests["base32hexupper"])
-        #expect(testString2.encodeUTF8(base: .base32HexUpper) == "V8HIM6PBEEHP62R39F9II0PBMCLP7IT38D5N6E891")
+        #expect(testString.multibaseEncoded(.base32HexUpper) == BasicTests["base32hexupper"])
+        #expect(testString2.multibaseEncoded(.base32HexUpper) == "V8HIM6PBEEHP62R39F9II0PBMCLP7IT38D5N6E891")
 
-        let multibase1 = try BaseEncoding.decodeIntoString("VF5IN683DC5N6I811")
+        let multibase1 = try decodeText("VF5IN683DC5N6I811")
         #expect(multibase1.base == .base32HexUpper)
         #expect(multibase1.string == "yes mani !")
 
-        let multibase2 = try BaseEncoding.decodeIntoString("V8HIM6PBEEHP62R39F9II0PBMCLP7IT38D5N6E891")
+        let multibase2 = try decodeText("V8HIM6PBEEHP62R39F9II0PBMCLP7IT38D5N6E891")
         #expect(multibase2.base == .base32HexUpper)
         #expect(multibase2.string == "Decentralize everything!!")
     }
@@ -337,14 +344,14 @@ struct MultibaseTests {
         let testString2 = "Decentralize everything!!"
 
         //Base32PadUpper
-        #expect(testString.encodeUTF8(base: .base32HexPad) == BasicTests["base32hexpad"])
-        #expect(testString2.encodeUTF8(base: .base32HexPad) == "t8him6pbeehp62r39f9ii0pbmclp7it38d5n6e891")
+        #expect(testString.multibaseEncoded(.base32HexPad) == BasicTests["base32hexpad"])
+        #expect(testString2.multibaseEncoded(.base32HexPad) == "t8him6pbeehp62r39f9ii0pbmclp7it38d5n6e891")
 
-        let multibase1 = try BaseEncoding.decodeIntoString("tf5in683dc5n6i811")
+        let multibase1 = try decodeText("tf5in683dc5n6i811")
         #expect(multibase1.base == .base32HexPad)
         #expect(multibase1.string == "yes mani !")
 
-        let multibase2 = try BaseEncoding.decodeIntoString("t8him6pbeehp62r39f9ii0pbmclp7it38d5n6e891")
+        let multibase2 = try decodeText("t8him6pbeehp62r39f9ii0pbmclp7it38d5n6e891")
         #expect(multibase2.base == .base32HexPad)
         #expect(multibase2.string == "Decentralize everything!!")
     }
@@ -354,14 +361,14 @@ struct MultibaseTests {
         let testString2 = "Decentralize everything!!"
 
         //Base32PadUpper
-        #expect(testString.encodeUTF8(base: .base32HexPadUpper) == BasicTests["base32hexpadupper"])
-        #expect(testString2.encodeUTF8(base: .base32HexPadUpper) == "T8HIM6PBEEHP62R39F9II0PBMCLP7IT38D5N6E891")
+        #expect(testString.multibaseEncoded(.base32HexPadUpper) == BasicTests["base32hexpadupper"])
+        #expect(testString2.multibaseEncoded(.base32HexPadUpper) == "T8HIM6PBEEHP62R39F9II0PBMCLP7IT38D5N6E891")
 
-        let multibase1 = try BaseEncoding.decodeIntoString("TF5IN683DC5N6I811")
+        let multibase1 = try decodeText("TF5IN683DC5N6I811")
         #expect(multibase1.base == .base32HexPadUpper)
         #expect(multibase1.string == "yes mani !")
 
-        let multibase2 = try BaseEncoding.decodeIntoString("T8HIM6PBEEHP62R39F9II0PBMCLP7IT38D5N6E891")
+        let multibase2 = try decodeText("T8HIM6PBEEHP62R39F9II0PBMCLP7IT38D5N6E891")
         #expect(multibase2.base == .base32HexPadUpper)
         #expect(multibase2.string == "Decentralize everything!!")
     }
@@ -371,14 +378,14 @@ struct MultibaseTests {
         let testString2 = "Decentralize everything!!"
 
         //Base32z
-        #expect(testString.encodeUTF8(base: .base32z) == BasicTests["base32z"])
-        #expect(testString2.encodeUTF8(base: .base32z) == "het1sg3mqqt3gn5djxj11y3msci3817depfzgqejb")
+        #expect(testString.multibaseEncoded(.base32z) == BasicTests["base32z"])
+        #expect(testString2.multibaseEncoded(.base32z) == "het1sg3mqqt3gn5djxj11y3msci3817depfzgqejb")
 
-        let multibase1 = try BaseEncoding.decodeIntoString("hxf1zgedpcfzg1ebb")
+        let multibase1 = try decodeText("hxf1zgedpcfzg1ebb")
         #expect(multibase1.base == .base32z)
         #expect(multibase1.string == "yes mani !")
 
-        let multibase2 = try BaseEncoding.decodeIntoString("het1sg3mqqt3gn5djxj11y3msci3817depfzgqejb")
+        let multibase2 = try decodeText("het1sg3mqqt3gn5djxj11y3msci3817depfzgqejb")
         #expect(multibase2.base == .base32z)
         #expect(multibase2.string == "Decentralize everything!!")
     }
@@ -388,14 +395,14 @@ struct MultibaseTests {
         let testString2 = "Decentralize everything!!"
 
         //Base36
-        #expect(testString.encodeUTF8(base: .base36) == BasicTests["base36"])
-        #expect(testString2.encodeUTF8(base: .base36) == "k343ixo7d49hqj1ium15pgy1wzww5fxrid21td7l")
+        #expect(testString.multibaseEncoded(.base36) == BasicTests["base36"])
+        #expect(testString2.multibaseEncoded(.base36) == "k343ixo7d49hqj1ium15pgy1wzww5fxrid21td7l")
 
-        let multibase1 = try BaseEncoding.decodeIntoString("k2lcpzo5yikidynFl")
+        let multibase1 = try decodeText("k2lcpzo5yikidynFl")
         #expect(multibase1.base == .base36)
         #expect(multibase1.string == "yes mani !")
 
-        let multibase2 = try BaseEncoding.decodeIntoString("k343ixo7d49hqj1ium15pgy1wzww5fxrid21td7l")
+        let multibase2 = try decodeText("k343ixo7d49hqj1ium15pgy1wzww5fxrid21td7l")
         #expect(multibase2.base == .base36)
         #expect(multibase2.string == "Decentralize everything!!")
     }
@@ -405,14 +412,14 @@ struct MultibaseTests {
         let testString2 = "Decentralize everything!!"
 
         //Base36 Upper
-        #expect(testString.encodeUTF8(base: .base36Upper) == BasicTests["base36upper"])
-        #expect(testString2.encodeUTF8(base: .base36Upper) == "K343IXO7D49HQJ1IUM15PGY1WZWW5FXRID21TD7L")
+        #expect(testString.multibaseEncoded(.base36Upper) == BasicTests["base36upper"])
+        #expect(testString2.multibaseEncoded(.base36Upper) == "K343IXO7D49HQJ1IUM15PGY1WZWW5FXRID21TD7L")
 
-        let multibase1 = try BaseEncoding.decodeIntoString("K2LCPZO5YIKIDYNfL")
+        let multibase1 = try decodeText("K2LCPZO5YIKIDYNfL")
         #expect(multibase1.base == .base36Upper)
         #expect(multibase1.string == "yes mani !")
 
-        let multibase2 = try BaseEncoding.decodeIntoString("K343IXO7D49HQJ1IUM15PGY1WZWW5FXRID21TD7L")
+        let multibase2 = try decodeText("K343IXO7D49HQJ1IUM15PGY1WZWW5FXRID21TD7L")
         #expect(multibase2.base == .base36Upper)
         #expect(multibase2.string == "Decentralize everything!!")
     }
@@ -421,14 +428,14 @@ struct MultibaseTests {
         let testString = "yes mani !"
         let testString2 = "Decentralize everything!!"
         //Base58 BTC
-        #expect(testString.encodeUTF8(base: .base58btc) == BasicTests["base58btc"])
-        #expect(testString2.encodeUTF8(base: .base58btc) == "zUXE7GvtEk8XTXs1GF8HSGbVA9FCX9SEBPe")
+        #expect(testString.multibaseEncoded(.base58btc) == BasicTests["base58btc"])
+        #expect(testString2.multibaseEncoded(.base58btc) == "zUXE7GvtEk8XTXs1GF8HSGbVA9FCX9SEBPe")
 
-        let multibase1 = try BaseEncoding.decodeIntoString("z7paNL19xttacUY")
+        let multibase1 = try decodeText("z7paNL19xttacUY")
         #expect(multibase1.base == .base58btc)
         #expect(multibase1.string == "yes mani !")
 
-        let multibase2 = try BaseEncoding.decodeIntoString("zUXE7GvtEk8XTXs1GF8HSGbVA9FCX9SEBPe")
+        let multibase2 = try decodeText("zUXE7GvtEk8XTXs1GF8HSGbVA9FCX9SEBPe")
         #expect(multibase2.base == .base58btc)
         #expect(multibase2.string == "Decentralize everything!!")
     }
@@ -437,14 +444,14 @@ struct MultibaseTests {
         let testString = "yes mani !"
         let testString2 = "Decentralize everything!!"
         //Base58 BTC
-        #expect(testString.encodeUTF8(base: .base58flickr) == BasicTests["base58flickr"])
-        #expect(testString2.encodeUTF8(base: .base58flickr) == "Ztwe7gVTeK8wswS1gf8hrgAua9fcw9reboD")
+        #expect(testString.multibaseEncoded(.base58flickr) == BasicTests["base58flickr"])
+        #expect(testString2.multibaseEncoded(.base58flickr) == "Ztwe7gVTeK8wswS1gf8hrgAua9fcw9reboD")
 
-        let multibase1 = try BaseEncoding.decodeIntoString("Z7Pznk19XTTzBtx")
+        let multibase1 = try decodeText("Z7Pznk19XTTzBtx")
         #expect(multibase1.base == .base58flickr)
         #expect(multibase1.string == "yes mani !")
 
-        let multibase2 = try BaseEncoding.decodeIntoString("Ztwe7gVTeK8wswS1gf8hrgAua9fcw9reboD")
+        let multibase2 = try decodeText("Ztwe7gVTeK8wswS1gf8hrgAua9fcw9reboD")
         #expect(multibase2.base == .base58flickr)
         #expect(multibase2.string == "Decentralize everything!!")
     }
@@ -454,14 +461,14 @@ struct MultibaseTests {
         let testString2 = "Decentralize everything!!"
 
         //Base64
-        #expect(testString.encodeUTF8(base: .base64) == BasicTests["base64"])
-        #expect(testString2.encodeUTF8(base: .base64) == "mRGVjZW50cmFsaXplIGV2ZXJ5dGhpbmchIQ")
+        #expect(testString.multibaseEncoded(.base64) == BasicTests["base64"])
+        #expect(testString2.multibaseEncoded(.base64) == "mRGVjZW50cmFsaXplIGV2ZXJ5dGhpbmchIQ")
 
-        let multibase1 = try BaseEncoding.decodeIntoString("meWVzIG1hbmkgIQ")
+        let multibase1 = try decodeText("meWVzIG1hbmkgIQ")
         #expect(multibase1.base == .base64)
         #expect(multibase1.string == "yes mani !")
 
-        let multibase2 = try BaseEncoding.decodeIntoString("mRGVjZW50cmFsaXplIGV2ZXJ5dGhpbmchIQ")
+        let multibase2 = try decodeText("mRGVjZW50cmFsaXplIGV2ZXJ5dGhpbmchIQ")
         #expect(multibase2.base == .base64)
         #expect(multibase2.string == "Decentralize everything!!")
     }
@@ -471,14 +478,14 @@ struct MultibaseTests {
         let testString2 = "Decentralize everything!!"
 
         //Base64
-        #expect(testString.encodeUTF8(base: .base64Pad) == BasicTests["base64pad"])
-        #expect(testString2.encodeUTF8(base: .base64Pad) == "MRGVjZW50cmFsaXplIGV2ZXJ5dGhpbmchIQ==")
+        #expect(testString.multibaseEncoded(.base64Pad) == BasicTests["base64pad"])
+        #expect(testString2.multibaseEncoded(.base64Pad) == "MRGVjZW50cmFsaXplIGV2ZXJ5dGhpbmchIQ==")
 
-        let multibase1 = try BaseEncoding.decodeIntoString("MeWVzIG1hbmkgIQ==")
+        let multibase1 = try decodeText("MeWVzIG1hbmkgIQ==")
         #expect(multibase1.base == .base64Pad)
         #expect(multibase1.string == "yes mani !")
 
-        let multibase2 = try BaseEncoding.decodeIntoString("MRGVjZW50cmFsaXplIGV2ZXJ5dGhpbmchIQ==")
+        let multibase2 = try decodeText("MRGVjZW50cmFsaXplIGV2ZXJ5dGhpbmchIQ==")
         #expect(multibase2.base == .base64Pad)
         #expect(multibase2.string == "Decentralize everything!!")
     }
@@ -488,14 +495,14 @@ struct MultibaseTests {
         let testString2 = "Decentralize everything!!"
 
         //Base64
-        #expect(testString.encodeUTF8(base: .base64Url) == BasicTests["base64url"])
-        #expect(testString2.encodeUTF8(base: .base64Url) == "uRGVjZW50cmFsaXplIGV2ZXJ5dGhpbmchIQ")
+        #expect(testString.multibaseEncoded(.base64Url) == BasicTests["base64url"])
+        #expect(testString2.multibaseEncoded(.base64Url) == "uRGVjZW50cmFsaXplIGV2ZXJ5dGhpbmchIQ")
 
-        let multibase1 = try BaseEncoding.decodeIntoString("ueWVzIG1hbmkgIQ")
+        let multibase1 = try decodeText("ueWVzIG1hbmkgIQ")
         #expect(multibase1.base == .base64Url)
         #expect(multibase1.string == "yes mani !")
 
-        let multibase2 = try BaseEncoding.decodeIntoString("uRGVjZW50cmFsaXplIGV2ZXJ5dGhpbmchIQ==")
+        let multibase2 = try decodeText("uRGVjZW50cmFsaXplIGV2ZXJ5dGhpbmchIQ==")
         #expect(multibase2.base == .base64Url)
         #expect(multibase2.string == "Decentralize everything!!")
     }
@@ -505,14 +512,14 @@ struct MultibaseTests {
         let testString2 = "Decentralize everything!!"
 
         //Base64
-        #expect(testString.encodeUTF8(base: .base64UrlPad) == BasicTests["base64urlpad"])
-        #expect(testString2.encodeUTF8(base: .base64UrlPad) == "URGVjZW50cmFsaXplIGV2ZXJ5dGhpbmchIQ==")
+        #expect(testString.multibaseEncoded(.base64UrlPad) == BasicTests["base64urlpad"])
+        #expect(testString2.multibaseEncoded(.base64UrlPad) == "URGVjZW50cmFsaXplIGV2ZXJ5dGhpbmchIQ==")
 
-        let multibase1 = try BaseEncoding.decodeIntoString("UeWVzIG1hbmkgIQ==")
+        let multibase1 = try decodeText("UeWVzIG1hbmkgIQ==")
         #expect(multibase1.base == .base64UrlPad)
         #expect(multibase1.string == "yes mani !")
 
-        let multibase2 = try BaseEncoding.decodeIntoString("URGVjZW50cmFsaXplIGV2ZXJ5dGhpbmchIQ==")
+        let multibase2 = try decodeText("URGVjZW50cmFsaXplIGV2ZXJ5dGhpbmchIQ==")
         #expect(multibase2.base == .base64UrlPad)
         #expect(multibase2.string == "Decentralize everything!!")
     }
@@ -530,11 +537,11 @@ struct MultibaseTests {
         ]
 
         for test in tests.sorted(by: { $0.key.count < $1.key.count }) {
-            let encoded = test.key.encode(as: .base64, using: .utf8)
-            //print("\"\(test.key)\".encode(as: .base64, using: .utf8) => \(encoded)")
+            let encoded = test.key.multibaseEncoded(.base64)
+            //print("\"\(test.key)\".multibaseEncoded(.base64) => \(encoded)")
             #expect(encoded == test.value)
 
-            let decoded = try BaseEncoding.decodeIntoString(encoded)
+            let decoded = try decodeText(encoded)
             #expect(decoded.base == .base64)
             #expect(decoded.string == test.key)
         }
@@ -553,11 +560,11 @@ struct MultibaseTests {
         ]
 
         for test in tests.sorted(by: { $0.key.count < $1.key.count }) {
-            let encoded = test.key.encode(as: .base64Pad, using: .utf8)
-            //print("\"\(test.key)\".encode(as: .base64Pad, using: .utf8) => \(encoded)")
+            let encoded = test.key.multibaseEncoded(.base64Pad)
+            //print("\"\(test.key)\".multibaseEncoded(.base64Pad) => \(encoded)")
             #expect(encoded == test.value)
 
-            let decoded = try BaseEncoding.decodeIntoString(encoded)
+            let decoded = try decodeText(encoded)
             #expect(decoded.base == .base64Pad)
             #expect(decoded.string == test.key)
         }
@@ -576,11 +583,11 @@ struct MultibaseTests {
         ]
 
         for test in tests.sorted(by: { $0.key.count < $1.key.count }) {
-            let encoded = test.key.encode(as: .base64Url, using: .utf8)
-            //print("\"\(test.key)\".encode(as: .base64Url, using: .utf8) => \(encoded)")
+            let encoded = test.key.multibaseEncoded(.base64Url)
+            //print("\"\(test.key)\".multibaseEncoded(.base64Url) => \(encoded)")
             #expect(encoded == test.value)
 
-            let decoded = try BaseEncoding.decodeIntoString(encoded)
+            let decoded = try decodeText(encoded)
             #expect(decoded.base == .base64Url)
             #expect(decoded.string == test.key)
         }
@@ -599,11 +606,11 @@ struct MultibaseTests {
         ]
 
         for test in tests.sorted(by: { $0.key.count < $1.key.count }) {
-            let encoded = test.key.encode(as: .base64UrlPad, using: .utf8)
-            //print("\"\(test.key)\".encode(as: .base64UrlPad, using: .utf8) => \(encoded)")
+            let encoded = test.key.multibaseEncoded(.base64UrlPad)
+            //print("\"\(test.key)\".multibaseEncoded(.base64UrlPad) => \(encoded)")
             #expect(encoded == test.value)
 
-            let decoded = try BaseEncoding.decodeIntoString(encoded)
+            let decoded = try decodeText(encoded)
             #expect(decoded.base == .base64UrlPad)
             #expect(decoded.string == test.key)
         }
@@ -622,42 +629,14 @@ struct MultibaseTests {
         ]
 
         for test in tests.sorted(by: { $0.key.count < $1.key.count }) {
-            let encoded = test.key.encode(as: .base32Pad, using: .utf8)
-            //print("\"\(test.key)\".encode(as: .base32Pad, using: .utf8) => \(encoded)")
+            let encoded = test.key.multibaseEncoded(.base32Pad)
+            //print("\"\(test.key)\".multibaseEncoded(.base32Pad) => \(encoded)")
             #expect(encoded == test.value)
 
-            let decoded = try BaseEncoding.decodeIntoString(encoded)
+            let decoded = try decodeText(encoded)
             #expect(decoded.base == .base32Pad)
             #expect(decoded.string == test.key)
         }
-    }
-
-    @Test func testUTF8() {
-        //hello world
-        //        let helloBytes:[UInt8] = [
-        //            104,
-        //            101,
-        //            108,
-        //            108,
-        //            111,
-        //            32,
-        //            119,
-        //            111,
-        //            114,
-        //            108,
-        //            100,
-        //          ]
-        //
-        //        let encoded = Array("hello world".utf8)
-        //        print(encoded)
-        //
-        //        let decoded = String(bytes: helloBytes, encoding: .utf8)
-        //        print(decoded)
-        //
-        //        let base16 = "hello world".encodeUTF8(base: .base16)
-        //        let base16Test = "yes mani !".encodeUTF8(base: .base16Upper)
-        //        print(base16)
-        //        print(base16Test)
     }
 
     @Test func testBasicEncoding() {
@@ -665,103 +644,103 @@ struct MultibaseTests {
         let testString2 = "Decentralize everything!!"
 
         //Base2
-        #expect(testString.encodeUTF8(base: .base2) == BasicTests["base2"])
+        #expect(testString.multibaseEncoded(.base2) == BasicTests["base2"])
         #expect(
-            testString2.encodeUTF8(base: .base2)
+            testString2.multibaseEncoded(.base2)
                 == "001000100011001010110001101100101011011100111010001110010011000010110110001101001011110100110010100100000011001010111011001100101011100100111100101110100011010000110100101101110011001110010000100100001"
         )
 
         // Base 8 (3 bits per character)
-        #expect(testString.encodeUTF8(base: .base8) == BasicTests["base8"])
+        #expect(testString.multibaseEncoded(.base8) == BasicTests["base8"])
         #expect(
-            testString2.encodeUTF8(base: .base8)
+            testString2.multibaseEncoded(.base8)
                 == "72106254331267164344605543227514510062566312711713506415133463441102"
         )
 
         // Base 10
-        #expect(testString.encodeUTF8(base: .base10) == BasicTests["base10"])
+        #expect(testString.multibaseEncoded(.base10) == BasicTests["base10"])
         #expect(
-            testString2.encodeUTF8(base: .base10)
+            testString2.multibaseEncoded(.base10)
                 == "9429328951066508984658627669258025763026247056774804621697313"
         )
 
         //Base16 lowercased
-        #expect(testString.encodeUTF8(base: .base16) == BasicTests["base16"])
-        #expect(testString2.encodeUTF8(base: .base16) == "f446563656e7472616c697a652065766572797468696e672121")
+        #expect(testString.multibaseEncoded(.base16) == BasicTests["base16"])
+        #expect(testString2.multibaseEncoded(.base16) == "f446563656e7472616c697a652065766572797468696e672121")
 
         //Base16 uppercased
-        #expect(testString.encodeUTF8(base: .base16Upper) == BasicTests["base16upper"])
+        #expect(testString.multibaseEncoded(.base16Upper) == BasicTests["base16upper"])
         #expect(
-            testString2.encodeUTF8(base: .base16Upper) == "F446563656E7472616C697A652065766572797468696E672121"
+            testString2.multibaseEncoded(.base16Upper) == "F446563656E7472616C697A652065766572797468696E672121"
         )
 
         //Base32
-        #expect(testString.encodeUTF8(base: .base32) == BasicTests["base32"])
-        #expect(testString2.encodeUTF8(base: .base32) == "birswgzloorzgc3djpjssazlwmvzhs5dinfxgoijb")
+        #expect(testString.multibaseEncoded(.base32) == BasicTests["base32"])
+        #expect(testString2.multibaseEncoded(.base32) == "birswgzloorzgc3djpjssazlwmvzhs5dinfxgoijb")
 
         //Base32Upper
-        #expect(testString.encodeUTF8(base: .base32Upper) == BasicTests["base32upper"])
-        #expect(testString2.encodeUTF8(base: .base32Upper) == "BIRSWGZLOORZGC3DJPJSSAZLWMVZHS5DINFXGOIJB")
+        #expect(testString.multibaseEncoded(.base32Upper) == BasicTests["base32upper"])
+        #expect(testString2.multibaseEncoded(.base32Upper) == "BIRSWGZLOORZGC3DJPJSSAZLWMVZHS5DINFXGOIJB")
 
         //Base32Hex
-        #expect(testString.encodeUTF8(base: .base32Hex) == BasicTests["base32hex"])
-        #expect(testString2.encodeUTF8(base: .base32Hex) == "v8him6pbeehp62r39f9ii0pbmclp7it38d5n6e891")
+        #expect(testString.multibaseEncoded(.base32Hex) == BasicTests["base32hex"])
+        #expect(testString2.multibaseEncoded(.base32Hex) == "v8him6pbeehp62r39f9ii0pbmclp7it38d5n6e891")
 
         //Base32HexUpper
-        #expect(testString.encodeUTF8(base: .base32HexUpper) == BasicTests["base32hexupper"])
-        #expect(testString2.encodeUTF8(base: .base32HexUpper) == "V8HIM6PBEEHP62R39F9II0PBMCLP7IT38D5N6E891")
+        #expect(testString.multibaseEncoded(.base32HexUpper) == BasicTests["base32hexupper"])
+        #expect(testString2.multibaseEncoded(.base32HexUpper) == "V8HIM6PBEEHP62R39F9II0PBMCLP7IT38D5N6E891")
 
         //Base32Pad
-        #expect(testString.encodeUTF8(base: .base32Pad) == BasicTests["base32pad"])
-        #expect(testString2.encodeUTF8(base: .base32Pad) == "cirswgzloorzgc3djpjssazlwmvzhs5dinfxgoijb")
+        #expect(testString.multibaseEncoded(.base32Pad) == BasicTests["base32pad"])
+        #expect(testString2.multibaseEncoded(.base32Pad) == "cirswgzloorzgc3djpjssazlwmvzhs5dinfxgoijb")
 
         //Base32PadUpper
-        #expect(testString.encodeUTF8(base: .base32PadUpper) == BasicTests["base32padupper"])
-        #expect(testString2.encodeUTF8(base: .base32PadUpper) == "CIRSWGZLOORZGC3DJPJSSAZLWMVZHS5DINFXGOIJB")
+        #expect(testString.multibaseEncoded(.base32PadUpper) == BasicTests["base32padupper"])
+        #expect(testString2.multibaseEncoded(.base32PadUpper) == "CIRSWGZLOORZGC3DJPJSSAZLWMVZHS5DINFXGOIJB")
 
         //Base32HexPad
-        #expect(testString.encodeUTF8(base: .base32HexPad) == BasicTests["base32hexpad"])
-        #expect(testString2.encodeUTF8(base: .base32HexPad) == "t8him6pbeehp62r39f9ii0pbmclp7it38d5n6e891")
+        #expect(testString.multibaseEncoded(.base32HexPad) == BasicTests["base32hexpad"])
+        #expect(testString2.multibaseEncoded(.base32HexPad) == "t8him6pbeehp62r39f9ii0pbmclp7it38d5n6e891")
 
         //Base32HexPadUpper
-        #expect(testString.encodeUTF8(base: .base32HexPadUpper) == BasicTests["base32hexpadupper"])
-        #expect(testString2.encodeUTF8(base: .base32HexPadUpper) == "T8HIM6PBEEHP62R39F9II0PBMCLP7IT38D5N6E891")
+        #expect(testString.multibaseEncoded(.base32HexPadUpper) == BasicTests["base32hexpadupper"])
+        #expect(testString2.multibaseEncoded(.base32HexPadUpper) == "T8HIM6PBEEHP62R39F9II0PBMCLP7IT38D5N6E891")
 
         //Base32z
-        #expect(testString.encodeUTF8(base: .base32z) == BasicTests["base32z"])
-        #expect(testString2.encodeUTF8(base: .base32z) == "het1sg3mqqt3gn5djxj11y3msci3817depfzgqejb")
+        #expect(testString.multibaseEncoded(.base32z) == BasicTests["base32z"])
+        #expect(testString2.multibaseEncoded(.base32z) == "het1sg3mqqt3gn5djxj11y3msci3817depfzgqejb")
 
         //Base36
-        #expect(testString.encodeUTF8(base: .base36) == BasicTests["base36"])
-        #expect(testString2.encodeUTF8(base: .base36) == "k343ixo7d49hqj1ium15pgy1wzww5fxrid21td7l")
+        #expect(testString.multibaseEncoded(.base36) == BasicTests["base36"])
+        #expect(testString2.multibaseEncoded(.base36) == "k343ixo7d49hqj1ium15pgy1wzww5fxrid21td7l")
 
         //Base36Upper
-        #expect(testString.encodeUTF8(base: .base36Upper) == BasicTests["base36upper"])
-        #expect(testString2.encodeUTF8(base: .base36Upper) == "K343IXO7D49HQJ1IUM15PGY1WZWW5FXRID21TD7L")
+        #expect(testString.multibaseEncoded(.base36Upper) == BasicTests["base36upper"])
+        #expect(testString2.multibaseEncoded(.base36Upper) == "K343IXO7D49HQJ1IUM15PGY1WZWW5FXRID21TD7L")
 
         //Base58 Flickr
-        #expect(testString.encodeUTF8(base: .base58flickr) == BasicTests["base58flickr"])
-        #expect(testString2.encodeUTF8(base: .base58flickr) == "Ztwe7gVTeK8wswS1gf8hrgAua9fcw9reboD")
+        #expect(testString.multibaseEncoded(.base58flickr) == BasicTests["base58flickr"])
+        #expect(testString2.multibaseEncoded(.base58flickr) == "Ztwe7gVTeK8wswS1gf8hrgAua9fcw9reboD")
 
         //Base58 BTC
-        #expect(testString.encodeUTF8(base: .base58btc) == BasicTests["base58btc"])
-        #expect(testString2.encodeUTF8(base: .base58btc) == "zUXE7GvtEk8XTXs1GF8HSGbVA9FCX9SEBPe")
+        #expect(testString.multibaseEncoded(.base58btc) == BasicTests["base58btc"])
+        #expect(testString2.multibaseEncoded(.base58btc) == "zUXE7GvtEk8XTXs1GF8HSGbVA9FCX9SEBPe")
 
         //Base64
-        #expect(testString.encodeUTF8(base: .base64) == BasicTests["base64"])
-        #expect(testString2.encodeUTF8(base: .base64) == "mRGVjZW50cmFsaXplIGV2ZXJ5dGhpbmchIQ")
+        #expect(testString.multibaseEncoded(.base64) == BasicTests["base64"])
+        #expect(testString2.multibaseEncoded(.base64) == "mRGVjZW50cmFsaXplIGV2ZXJ5dGhpbmchIQ")
 
         //Base64Pad
-        #expect(testString.encodeUTF8(base: .base64Pad) == BasicTests["base64pad"])
-        #expect(testString2.encodeUTF8(base: .base64Pad) == "MRGVjZW50cmFsaXplIGV2ZXJ5dGhpbmchIQ==")
+        #expect(testString.multibaseEncoded(.base64Pad) == BasicTests["base64pad"])
+        #expect(testString2.multibaseEncoded(.base64Pad) == "MRGVjZW50cmFsaXplIGV2ZXJ5dGhpbmchIQ==")
 
         //Base64Url
-        #expect(testString.encodeUTF8(base: .base64Url) == BasicTests["base64url"])
-        #expect(testString2.encodeUTF8(base: .base64Url) == "uRGVjZW50cmFsaXplIGV2ZXJ5dGhpbmchIQ")
+        #expect(testString.multibaseEncoded(.base64Url) == BasicTests["base64url"])
+        #expect(testString2.multibaseEncoded(.base64Url) == "uRGVjZW50cmFsaXplIGV2ZXJ5dGhpbmchIQ")
 
         //Base64UrlPad
-        #expect(testString.encodeUTF8(base: .base64UrlPad) == BasicTests["base64urlpad"])
-        #expect(testString2.encodeUTF8(base: .base64UrlPad) == "URGVjZW50cmFsaXplIGV2ZXJ5dGhpbmchIQ==")
+        #expect(testString.multibaseEncoded(.base64UrlPad) == BasicTests["base64urlpad"])
+        #expect(testString2.multibaseEncoded(.base64UrlPad) == "URGVjZW50cmFsaXplIGV2ZXJ5dGhpbmchIQ==")
 
     }
 
@@ -769,62 +748,62 @@ struct MultibaseTests {
         let testString = "hello world"
 
         //Base16 Lower
-        let base16Lower = try BaseEncoding.decodeIntoString(CaseInsensitivityTests["base16"]!)
+        let base16Lower = try decodeText(CaseInsensitivityTests["base16"]!)
         #expect(base16Lower.base == .base16)
         #expect(base16Lower.string == testString)
 
         //Base16 Upper
-        let base16Upper = try BaseEncoding.decodeIntoString(CaseInsensitivityTests["base16upper"]!)
+        let base16Upper = try decodeText(CaseInsensitivityTests["base16upper"]!)
         #expect(base16Upper.base == .base16Upper)
         #expect(base16Upper.string == testString)
 
         //Base32
-        let base32 = try BaseEncoding.decodeIntoString(CaseInsensitivityTests["base32"]!)
+        let base32 = try decodeText(CaseInsensitivityTests["base32"]!)
         #expect(base32.base == .base32)
         #expect(base32.string == testString)
 
         //Base32 Upper
-        let base32Upper = try BaseEncoding.decodeIntoString(CaseInsensitivityTests["base32upper"]!)
+        let base32Upper = try decodeText(CaseInsensitivityTests["base32upper"]!)
         #expect(base32Upper.base == .base32Upper)
         #expect(base32Upper.string == testString)
 
         //Base32 Pad
-        let base32Pad = try BaseEncoding.decodeIntoString(CaseInsensitivityTests["base32pad"]!)
+        let base32Pad = try decodeText(CaseInsensitivityTests["base32pad"]!)
         #expect(base32Pad.base == .base32Pad)
         #expect(base32Pad.string == testString)
 
         //Base32 Upper Pad
-        let base32PadUpper = try BaseEncoding.decodeIntoString(CaseInsensitivityTests["base32padupper"]!)
+        let base32PadUpper = try decodeText(CaseInsensitivityTests["base32padupper"]!)
         #expect(base32PadUpper.base == .base32PadUpper)
         #expect(base32PadUpper.string == testString)
 
         //Base32 Hex
-        let base32Hex = try BaseEncoding.decodeIntoString(CaseInsensitivityTests["base32hex"]!)
+        let base32Hex = try decodeText(CaseInsensitivityTests["base32hex"]!)
         #expect(base32Hex.base == .base32Hex)
         #expect(base32Hex.string == testString)
 
         //Base32 Hex Upper
-        let base32HexUpper = try BaseEncoding.decodeIntoString(CaseInsensitivityTests["base32hexupper"]!)
+        let base32HexUpper = try decodeText(CaseInsensitivityTests["base32hexupper"]!)
         #expect(base32HexUpper.base == .base32HexUpper)
         #expect(base32HexUpper.string == testString)
 
         //Base32 Hex Pad
-        let base32HexPad = try BaseEncoding.decodeIntoString(CaseInsensitivityTests["base32hexpad"]!)
+        let base32HexPad = try decodeText(CaseInsensitivityTests["base32hexpad"]!)
         #expect(base32HexPad.base == .base32HexPad)
         #expect(base32HexPad.string == testString)
 
         //Base32 Hex Pad Upper
-        let base32HexPadUpper = try BaseEncoding.decodeIntoString(CaseInsensitivityTests["base32hexpadupper"]!)
+        let base32HexPadUpper = try decodeText(CaseInsensitivityTests["base32hexpadupper"]!)
         #expect(base32HexPadUpper.base == .base32HexPadUpper)
         #expect(base32HexPadUpper.string == testString)
 
         //Base36
-        let base36 = try BaseEncoding.decodeIntoString(CaseInsensitivityTests["base36"]!)
+        let base36 = try decodeText(CaseInsensitivityTests["base36"]!)
         #expect(base36.base == .base36)
         #expect(base36.string == testString)
 
         //Base36 Upper
-        let base36Upper = try BaseEncoding.decodeIntoString(CaseInsensitivityTests["base36upper"]!)
+        let base36Upper = try decodeText(CaseInsensitivityTests["base36upper"]!)
         #expect(base36Upper.base == .base36Upper)
         #expect(base36Upper.string == testString)
     }
@@ -834,70 +813,70 @@ struct MultibaseTests {
         let testString = "\0yes mani !"
 
         //Base2
-        #expect(testString.encodeUTF8(base: .base2) == CaseLeadingZero["base2"])
+        #expect(testString.multibaseEncoded(.base2) == CaseLeadingZero["base2"])
 
         //Base8
-        #expect(testString.encodeUTF8(base: .base8) == CaseLeadingZero["base8"])
+        #expect(testString.multibaseEncoded(.base8) == CaseLeadingZero["base8"])
 
         //Base10
-        #expect(testString.encodeUTF8(base: .base10) == CaseLeadingZero["base10"])
+        #expect(testString.multibaseEncoded(.base10) == CaseLeadingZero["base10"])
 
         //Base16 Lower
-        #expect(testString.encodeUTF8(base: .base16) == CaseLeadingZero["base16"])
+        #expect(testString.multibaseEncoded(.base16) == CaseLeadingZero["base16"])
 
         //Base16 Upper
-        #expect(testString.encodeUTF8(base: .base16Upper) == CaseLeadingZero["base16upper"])
+        #expect(testString.multibaseEncoded(.base16Upper) == CaseLeadingZero["base16upper"])
 
         //Base32
-        #expect(testString.encodeUTF8(base: .base32) == CaseLeadingZero["base32"])
+        #expect(testString.multibaseEncoded(.base32) == CaseLeadingZero["base32"])
 
         //Base32 Upper
-        #expect(testString.encodeUTF8(base: .base32Upper) == CaseLeadingZero["base32upper"])
+        #expect(testString.multibaseEncoded(.base32Upper) == CaseLeadingZero["base32upper"])
 
         //Base32 Pad
-        #expect(testString.encodeUTF8(base: .base32Pad) == CaseLeadingZero["base32pad"])
+        #expect(testString.multibaseEncoded(.base32Pad) == CaseLeadingZero["base32pad"])
 
         //Base32 Upper Pad
-        #expect(testString.encodeUTF8(base: .base32PadUpper) == CaseLeadingZero["base32padupper"])
+        #expect(testString.multibaseEncoded(.base32PadUpper) == CaseLeadingZero["base32padupper"])
 
         //Base32 Hex
-        #expect(testString.encodeUTF8(base: .base32Hex) == CaseLeadingZero["base32hex"])
+        #expect(testString.multibaseEncoded(.base32Hex) == CaseLeadingZero["base32hex"])
 
         //Base32 Hex Upper
-        #expect(testString.encodeUTF8(base: .base32HexUpper) == CaseLeadingZero["base32hexupper"])
+        #expect(testString.multibaseEncoded(.base32HexUpper) == CaseLeadingZero["base32hexupper"])
 
         //Base32 Hex Pad
-        #expect(testString.encodeUTF8(base: .base32HexPad) == CaseLeadingZero["base32hexpad"])
+        #expect(testString.multibaseEncoded(.base32HexPad) == CaseLeadingZero["base32hexpad"])
 
         //Base32 Hex Pad Upper
-        #expect(testString.encodeUTF8(base: .base32HexPadUpper) == CaseLeadingZero["base32hexpadupper"])
+        #expect(testString.multibaseEncoded(.base32HexPadUpper) == CaseLeadingZero["base32hexpadupper"])
 
         //Base32 Z
-        #expect(testString.encodeUTF8(base: .base32z) == CaseLeadingZero["base32z"])
+        #expect(testString.multibaseEncoded(.base32z) == CaseLeadingZero["base32z"])
 
         //Base36
-        #expect(testString.encodeUTF8(base: .base36) == CaseLeadingZero["base36"])
+        #expect(testString.multibaseEncoded(.base36) == CaseLeadingZero["base36"])
 
         //Base36 Upper
-        #expect(testString.encodeUTF8(base: .base36Upper) == CaseLeadingZero["base36upper"])
+        #expect(testString.multibaseEncoded(.base36Upper) == CaseLeadingZero["base36upper"])
 
         //Base58 BTC
-        #expect(testString.encodeUTF8(base: .base58btc) == CaseLeadingZero["base58btc"])
+        #expect(testString.multibaseEncoded(.base58btc) == CaseLeadingZero["base58btc"])
 
         //Base58 Flickr
-        #expect(testString.encodeUTF8(base: .base58flickr) == CaseLeadingZero["base58flickr"])
+        #expect(testString.multibaseEncoded(.base58flickr) == CaseLeadingZero["base58flickr"])
 
         //Base64
-        #expect(testString.encodeUTF8(base: .base64) == CaseLeadingZero["base64"])
+        #expect(testString.multibaseEncoded(.base64) == CaseLeadingZero["base64"])
 
         //Base64 Pad
-        #expect(testString.encodeUTF8(base: .base64Pad) == CaseLeadingZero["base64pad"])
+        #expect(testString.multibaseEncoded(.base64Pad) == CaseLeadingZero["base64pad"])
 
         //Base64 URL
-        #expect(testString.encodeUTF8(base: .base64Url) == CaseLeadingZero["base64url"])
+        #expect(testString.multibaseEncoded(.base64Url) == CaseLeadingZero["base64url"])
 
         //Base64 URL Pad
-        #expect(testString.encodeUTF8(base: .base64UrlPad) == CaseLeadingZero["base64urlpad"])
+        #expect(testString.multibaseEncoded(.base64UrlPad) == CaseLeadingZero["base64urlpad"])
     }
 
     @Test func testTwoLeadingZero() {
@@ -905,131 +884,139 @@ struct MultibaseTests {
         let testString = "\0\0yes mani !"
 
         //Base2
-        #expect(testString.encodeUTF8(base: .base2) == CaseTwoLeadingZeros["base2"])
+        #expect(testString.multibaseEncoded(.base2) == CaseTwoLeadingZeros["base2"])
 
         //Base8
-        #expect(testString.encodeUTF8(base: .base8) == CaseTwoLeadingZeros["base8"])
+        #expect(testString.multibaseEncoded(.base8) == CaseTwoLeadingZeros["base8"])
 
         //Base10
-        #expect(testString.encodeUTF8(base: .base10) == CaseTwoLeadingZeros["base10"])
+        #expect(testString.multibaseEncoded(.base10) == CaseTwoLeadingZeros["base10"])
 
         //Base16
-        #expect(testString.encodeUTF8(base: .base16) == CaseTwoLeadingZeros["base16"])
+        #expect(testString.multibaseEncoded(.base16) == CaseTwoLeadingZeros["base16"])
 
         //Base16 Upper
-        #expect(testString.encodeUTF8(base: .base16Upper) == CaseTwoLeadingZeros["base16upper"])
+        #expect(testString.multibaseEncoded(.base16Upper) == CaseTwoLeadingZeros["base16upper"])
 
         //Base32
-        #expect(testString.encodeUTF8(base: .base32) == CaseTwoLeadingZeros["base32"])
+        #expect(testString.multibaseEncoded(.base32) == CaseTwoLeadingZeros["base32"])
 
         //Base32 Upper
-        #expect(testString.encodeUTF8(base: .base32Upper) == CaseTwoLeadingZeros["base32upper"])
+        #expect(testString.multibaseEncoded(.base32Upper) == CaseTwoLeadingZeros["base32upper"])
 
         //Base32 Pad
-        #expect(testString.encodeUTF8(base: .base32Pad) == CaseTwoLeadingZeros["base32pad"])
+        #expect(testString.multibaseEncoded(.base32Pad) == CaseTwoLeadingZeros["base32pad"])
 
         //Base32 Upper Pad
-        #expect(testString.encodeUTF8(base: .base32PadUpper) == CaseTwoLeadingZeros["base32padupper"])
+        #expect(testString.multibaseEncoded(.base32PadUpper) == CaseTwoLeadingZeros["base32padupper"])
 
         //Base32 Hex
-        #expect(testString.encodeUTF8(base: .base32Hex) == CaseTwoLeadingZeros["base32hex"])
+        #expect(testString.multibaseEncoded(.base32Hex) == CaseTwoLeadingZeros["base32hex"])
 
         //Base32 Hex Upper
-        #expect(testString.encodeUTF8(base: .base32HexUpper) == CaseTwoLeadingZeros["base32hexupper"])
+        #expect(testString.multibaseEncoded(.base32HexUpper) == CaseTwoLeadingZeros["base32hexupper"])
 
         //Base32 Hex Pad
-        #expect(testString.encodeUTF8(base: .base32HexPad) == CaseTwoLeadingZeros["base32hexpad"])
+        #expect(testString.multibaseEncoded(.base32HexPad) == CaseTwoLeadingZeros["base32hexpad"])
 
         //Base32 Hex Pad Upper
-        #expect(testString.encodeUTF8(base: .base32HexPadUpper) == CaseTwoLeadingZeros["base32hexpadupper"])
+        #expect(testString.multibaseEncoded(.base32HexPadUpper) == CaseTwoLeadingZeros["base32hexpadupper"])
 
         //Base32 Z
-        #expect(testString.encodeUTF8(base: .base32z) == CaseTwoLeadingZeros["base32z"])
+        #expect(testString.multibaseEncoded(.base32z) == CaseTwoLeadingZeros["base32z"])
 
         //Base36
-        #expect(testString.encodeUTF8(base: .base36) == CaseTwoLeadingZeros["base36"])
+        #expect(testString.multibaseEncoded(.base36) == CaseTwoLeadingZeros["base36"])
 
         //Base36 Upper
-        #expect(testString.encodeUTF8(base: .base36Upper) == CaseTwoLeadingZeros["base36upper"])
+        #expect(testString.multibaseEncoded(.base36Upper) == CaseTwoLeadingZeros["base36upper"])
 
         //Base58 BTC
-        #expect(testString.encodeUTF8(base: .base58btc) == CaseTwoLeadingZeros["base58btc"])
+        #expect(testString.multibaseEncoded(.base58btc) == CaseTwoLeadingZeros["base58btc"])
 
         //Base58 Flickr
-        #expect(testString.encodeUTF8(base: .base58flickr) == CaseTwoLeadingZeros["base58flickr"])
+        #expect(testString.multibaseEncoded(.base58flickr) == CaseTwoLeadingZeros["base58flickr"])
 
         //Base64
-        #expect(testString.encodeUTF8(base: .base64) == CaseTwoLeadingZeros["base64"])
+        #expect(testString.multibaseEncoded(.base64) == CaseTwoLeadingZeros["base64"])
 
         //Base64 Pad
-        #expect(testString.encodeUTF8(base: .base64Pad) == CaseTwoLeadingZeros["base64pad"])
+        #expect(testString.multibaseEncoded(.base64Pad) == CaseTwoLeadingZeros["base64pad"])
 
         //Base64 URL
-        #expect(testString.encodeUTF8(base: .base64Url) == CaseTwoLeadingZeros["base64url"])
+        #expect(testString.multibaseEncoded(.base64Url) == CaseTwoLeadingZeros["base64url"])
 
         //Base64 URL Pad
-        #expect(testString.encodeUTF8(base: .base64UrlPad) == CaseTwoLeadingZeros["base64urlpad"])
+        #expect(testString.multibaseEncoded(.base64UrlPad) == CaseTwoLeadingZeros["base64urlpad"])
     }
 
     @Test func testIdentityRoundTrip() throws {
         let testString = "yes mani !"
 
         // Encode with the identity multibase (0x00 prefix + raw bytes).
-        let encoded = testString.encodeUTF8(base: .identity)
+        let encoded = testString.multibaseEncoded(.identity)
         #expect(encoded == "\u{00}" + testString)
 
         // Decode must not throw and must round-trip (previously threw .unknownBase).
-        let decoded = try BaseEncoding.decodeIntoString(encoded)
+        let decoded = try decodeText(encoded)
         #expect(decoded.base == .identity)
         #expect(decoded.string == testString)
     }
 
-    @Test func testIdentityBinaryPayloadDoesNotCrash() {
-        // Non-UTF8 bytes through identity encode must not crash (previously force-unwrapped String(bytes:)).
+    @Test func testIdentityBinaryPayloadIsLossless() throws {
+        // Non-UTF8 bytes through identity must survive on the byte path. The String path
+        // still renders them lossily, which is why `encodedBytes` exists.
         let bytes: [UInt8] = [0x00, 0xFF, 0x10, 0x80]
-        let encoded = bytes.asString(base: .identity, withMultibasePrefix: true)
-        _ = encoded  // reaching here without a crash is the assertion
+        let encoded = bytes.multibaseEncodedBytes(.identity)
+        #expect(encoded == [0x00] + bytes)
+
+        let (base, decoded) = try encoded.multibase()
+        #expect(base == .identity)
+        #expect(decoded == bytes)
     }
 
-    @Test func testDecodeIntoStringThrowsOnNonUTF8() {
-        // A base16 string decoding to non-UTF8 bytes must throw rather than crash on the String(data:) unwrap.
+    @Test func testNonUTF8PayloadRendersLossily() throws {
+        // A base16 string decoding to non-UTF8 bytes used to throw on the `String(data:)`
+        // unwrap. The bytes now come back intact, and only rendering them as text is lossy.
         let nonUTF8Hex = "fff"  // 'f' prefix + "ff" => byte 0xFF, which is not valid UTF8
-        #expect(throws: MultibaseError.self) {
-            _ = try BaseEncoding.decodeIntoString(nonUTF8Hex)
-        }
+        let (base, bytes) = try nonUTF8Hex.multibase()
+        #expect(base == .base16)
+        #expect(bytes == [0xFF])
+        #expect(try decodeText(nonUTF8Hex).string == "\u{FFFD}")
     }
 
     @Test func testLiteralBackslashX00PayloadRoundTrips() throws {
         // Data literally starting with the ASCII bytes «\x00» must not be corrupted (old leading-zero bug).
         let testString = "\\x00hello"
-        let encoded = testString.encodeUTF8(base: .base16)
-        let decoded = try BaseEncoding.decodeIntoString(encoded)
+        let encoded = testString.multibaseEncoded(.base16)
+        let decoded = try decodeText(encoded)
         #expect(decoded.base == .base16)
         #expect(decoded.string == testString)
     }
 
-    @Test func testEncodeASCIINonASCIIDoesNotCrash() {
-        // Non-ASCII input to encodeASCII must not crash (previously force-unwrapped the .ascii conversion).
-        let encoded = "café".encodeASCII(base: .base16)
-        _ = encoded  // reaching here without a crash is the assertion
+    @Test func testNonASCIIInputEncodesItsUTF8Bytes() throws {
+        // `encodeASCII` used to drop non-ASCII input on the floor (an empty `Data`). The
+        // byte API encodes exactly what it is given, so this round-trips.
+        let encoded = "café".multibaseEncoded(.base16)
+        #expect(try decodeText(encoded).string == "café")
     }
 
     @Test func testPrefixLookupAndValidation() {
         #expect(BaseEncoding(prefix: "f") == .base16)
         #expect(BaseEncoding(prefix: "m") == .base64)
-        #expect(BaseEncoding(prefixByte: 0x00) == .identity)
+        #expect(BaseEncoding(prefix: "\u{0000}") == .identity)
         #expect(BaseEncoding(prefix: "😀") == nil)
 
-        #expect(BaseEncoding.base16.isValid("48656c6c6f"))
-        #expect(!BaseEncoding.base16.isValid("xyz"))
-        #expect(BaseEncoding.identity.isValid("anything at all"))
+        #expect(BaseEncoding.base16.isValid(Array("48656c6c6f".utf8)))
+        #expect(!BaseEncoding.base16.isValid(Array("xyz".utf8)))
+        #expect(BaseEncoding.identity.isValid(Array("anything at all".utf8)))
     }
 
     @Test func testEmptyInputRoundTrips() throws {
-        // Every base must round-trip empty data via the public Data API.
+        // Every base must round-trip empty input.
         for base in BaseEncoding.allCases {
-            let encoded = Data().asString(base: base, withMultibasePrefix: true)
-            let (decodedBase, decoded) = try BaseEncoding.decode(encoded)
+            let encoded = [UInt8]().multibaseEncoded(base)
+            let (decodedBase, decoded) = try encoded.multibase()
             #expect(decodedBase == base)
             #expect(decoded.isEmpty)
         }
@@ -1037,44 +1024,44 @@ struct MultibaseTests {
 
     @Test func testFullByteRangeRoundTrips() throws {
         // 0x00...0xFF exercises leading zeros, high bytes, and non-UTF8 payloads.
-        let blob = Data((0...255).map { UInt8($0) })
+        let blob = (0...255).map { UInt8($0) }
         for base in BaseEncoding.allCases where base != .identity {
-            let encoded = blob.asString(base: base, withMultibasePrefix: true)
-            let (_, decoded) = try BaseEncoding.decode(encoded)
-            #expect(decoded == blob, "round-trip failed for \(base)")
+            let encoded = blob.multibaseEncoded(base)
+            let (_, decoded) = try encoded.multibase()
+            #expect(decoded == blob, "round-trip failed for \(base.name)")
         }
     }
 
     @Test func testBase64InvalidCharacterThrowsMultibaseError() {
-        // Base-specific decode failures must surface as MultibaseError, not Base64.Error.
-        #expect(throws: MultibaseError.self) {
-            _ = try BaseEncoding.decode("m****")  // '*' is not in the base64 alphabet
+        // Base-specific decode failures must surface as MultibaseError, not BasesError.
+        #expect(throws: MultibaseError.decodingFailed(.nonAlphabetCharacter)) {
+            _ = try "m****".multibase()  // '*' is not in the base64 alphabet
         }
-        #expect(throws: MultibaseError.self) {
-            _ = try BaseEncoding.decode("u@@@@")  // '@' is not in the base64url alphabet
+        #expect(throws: MultibaseError.decodingFailed(.nonAlphabetCharacter)) {
+            _ = try "u@@@@".multibase()  // '@' is not in the base64url alphabet
         }
     }
 
     @Test func testBase64PaddingTolerance() throws {
         // Padded variant decoding an unpadded body, and vice-versa.
-        let unpaddedIntoPad = try BaseEncoding.decode("MZm9vYg")  // 'M' = base64Pad, but no '='
-        #expect(unpaddedIntoPad.data == Data("foob".utf8))
+        let unpaddedIntoPad = try "MZm9vYg".multibase()  // 'M' = base64Pad, but no '='
+        #expect(unpaddedIntoPad.bytes == Array("foob".utf8))
 
-        let paddedIntoUnpadded = try BaseEncoding.decode("mZm9vYg==")  // 'm' = base64, with '='
-        #expect(paddedIntoUnpadded.data == Data("foob".utf8))
+        let paddedIntoUnpadded = try "mZm9vYg==".multibase()  // 'm' = base64, with '='
+        #expect(paddedIntoUnpadded.bytes == Array("foob".utf8))
     }
 
     @Test func testDecodeUnknownPrefixThrows() {
-        #expect(throws: MultibaseError.self) {
-            _ = try BaseEncoding.decode("!not-a-multibase-prefix")
+        #expect(throws: MultibaseError.unknownBase) {
+            _ = try "!not-a-multibase-prefix".multibase()
         }
     }
 
     @Test func testBase58BTCPeerIDPrefix() throws {
         // The implicit "Qm…" (no multibase prefix) base58btc path.
         let peerID = "QmYwAPJzv5CZsnA625s3Xf2nemtYgPpHdWEz79ojWnPbdG"
-        let (base, data) = try BaseEncoding.decode(peerID)
+        let (base, bytes) = try peerID.multibase()
         #expect(base == .base58btc)
-        #expect(!data.isEmpty)
+        #expect(!bytes.isEmpty)
     }
 }
