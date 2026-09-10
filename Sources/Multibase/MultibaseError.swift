@@ -12,26 +12,45 @@
 //
 //===----------------------------------------------------------------------===//
 
-public enum MultibaseError: Error, Sendable {  // TODO: Hashable once we rethrow a typed error
+import Bases
 
+public enum MultibaseError: Error, Hashable, Sendable {
+
+    /// The input was empty, or its leading character is not in the Multibase table.
     case unknownBase
 
-    case invalidStringEncoding
+    /// The leading character names a table row that is reserved for something other than a
+    /// base encoding.
+    ///
+    /// The table reserves:
+    /// - `1`
+    /// - `Q`
+    /// - `/`
+    ///
+    /// - Note: A `Q` prefixed string is only accepted when it's a valid CIDv0 (`Qm…`),
+    ///   which is base58btc without the multibase prefix.
+    case reservedPrefix(Unicode.Scalar)
 
-    /// A base-specific decoder rejected the input (e.g. an invalid character for the base's alphabet).
-    /// The underlying swift-bases error is preserved for diagnostics.
-    case decodingFailed(underlying: any Error)
+    /// The base's decoder failed during decoding.
+    ///
+    /// Passes the underlying ``BasesError`` along for further information.
+    case decodingFailed(BasesError)
+
+    /// The decoded bytes could not be represented in the requested `String.Encoding`.
+    case invalidStringEncoding
 }
 
 extension MultibaseError: CustomStringConvertible {
     public var description: String {
         switch self {
         case .unknownBase:
-            return "The string is empty or its leading character is not a recognized multibase prefix."
-        case .invalidStringEncoding:
-            return "The data could not be represented in the requested string encoding."
+            "the input is empty, or its leading character is not a recognized multibase prefix"
+        case .reservedPrefix(let scalar):
+            "the multibase table reserves the prefix '\(scalar)' for something other than a base encoding"
         case .decodingFailed(let underlying):
-            return "The payload could not be decoded in the requested base: \(underlying)"
+            "the payload could not be decoded in the requested base: \(underlying)"
+        case .invalidStringEncoding:
+            "the decoded bytes could not be represented in the requested string encoding"
         }
     }
 }
